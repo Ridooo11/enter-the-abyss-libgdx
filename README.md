@@ -1,33 +1,46 @@
-# EnterTheAbyss
+# Enter The Abyss
 
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
+## Integrantes
+ - Marco Caputo 
+ - Luca Fontan
+ - Ramiro Ridolfi
 
-This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo.
+## Descripción
 
-## Platforms
+Enter the Abyss es un juego de acción y supervivencia con elementos roguelike, ambientado en un mundo post-apocalíptico donde ha colapsado tras un evento conocido como El Gran Silencio. Los jugadores asumen el papel de sobrevivientes que se adentran en El Abismo, una mazmorra  misteriosa, cambiante y llena de secretos, con el objetivo de reconstruir lo que queda de la humanidad.
 
-- `core`: Main module with the application logic shared by all platforms.
-- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
+## Tecnologías
 
-## Gradle
+Este videojuego será programado en Java, utilizando la versión 8, e integrará el framework LibGDX en su versión 1.13.1 para escritorio.
 
-This project uses [Gradle](https://gradle.org/) to manage dependencies.
-The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
-Useful Gradle tasks and flags:
+## Wiki
 
-- `--continue`: when using this flag, errors will not stop the tasks from running.
-- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
-- `--offline`: when using this flag, cached dependency archives will be used.
-- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
-- `build`: builds sources and archives of every project.
-- `cleanEclipse`: removes Eclipse project data.
-- `cleanIdea`: removes IntelliJ project data.
-- `clean`: removes `build` folders, which store compiled classes and built archives.
-- `eclipse`: generates Eclipse project data.
-- `idea`: generates IntelliJ project data.
-- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
-- `lwjgl3:run`: starts the application.
-- `test`: runs unit tests (if any).
+Podes encontrar informacion mas detallada en la [wiki](https://github.com/Ridooo11/enter-the-abyss-libgdx/wiki) 
 
-Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
-For example, `core:clean` removes `build` folder only from the `core` project.
+## Clonar el repositorio
+
+Primero en tu terminal vas a tener que seleccionar la carpeta donde queres clonar el repositorio, con el siguente comando:
+
+```bash
+cd nombre-carpeta-ejemplo
+```
+
+Una vez en la carpeta utiliza el siguente comando:
+
+```bash
+git clone https://github.com/Ridooo11/enter-the-abyss-libgdx
+```
+
+Luego en tu IDE deberas abrirlo como un proyecto de Gradle:
+
+- `IntelliJ IDEA`: <br>
+ o Anda a "File" > "Open..." (o "Open" en la pantalla de bienvenida).<br>
+ o Navega hasta la carpeta del proyecto que Liftoff acaba de crear. <br>
+ o Selecciona el archivo build.gradle (o la carpeta que lo contiene) y elegí "Open as Project". El IDE debería reconocerlo como un proyecto Gradle.
+
+ - `Eclipse`: <br>
+ o Anda a "File" > "Import...".<br>
+ o Selecciona "Gradle" > "Existing Gradle Project".<br>
+ o Navega hasta la carpeta raíz del proyecto generado y seguí los pasos del asistente.
+
+
