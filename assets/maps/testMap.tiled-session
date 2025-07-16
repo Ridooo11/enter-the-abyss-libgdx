@@ -6,6 +6,7 @@
     "activeFile": "sin no.tmx",
     "expandedProjectPaths": [
     ],
+    "file.lastUsedOpenFilter": "Todos los archivos (*)",
     "fileStates": {
         "": {
             "scaleInDock": 1
@@ -45,6 +46,8 @@
     "last.imagePath": "C:/Users/Rido/Desktop/EnterTheAbyss/assets/maps",
     "map.height": 30,
     "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
     "openFiles": [
         "sin no.tmx"
     ],
@@ -56,5 +59,9 @@
         "sin nombre.tmx"
     ],
     "tileset.embedInMap": true,
-    "tileset.lastUsedFormat": "tsx"
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
 }

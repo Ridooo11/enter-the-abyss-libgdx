@@ -3,6 +3,7 @@ package com.abyssdev.entertheabyss.lwjgl3;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
@@ -29,6 +30,8 @@ public class Lwjgl3Launcher {
         //// You may also need to configure GPU drivers to fully disable Vsync; this can cause screen tearing.
 
         configuration.setWindowedMode(640, 480);
+        // configuration.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+
         //// You can change these files; they are in lwjgl3/src/main/resources/ .
         //// They can also be loaded from the root of assets/ .
         configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
