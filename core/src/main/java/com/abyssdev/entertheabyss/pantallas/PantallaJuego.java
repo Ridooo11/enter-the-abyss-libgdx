@@ -49,7 +49,7 @@ public class PantallaJuego extends Pantalla {
         jugador.dibujar(juego.batch);
         juego.batch.end();
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             juego.setScreen(new PantallaPausa(juego, this));
         }
     }
