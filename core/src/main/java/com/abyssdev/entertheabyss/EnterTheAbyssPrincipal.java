@@ -1,6 +1,6 @@
 package com.abyssdev.entertheabyss;
 
-import com.abyssdev.entertheabyss.pantallas.PantallaJuego;
+import com.abyssdev.entertheabyss.pantallas.MenuInicio;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
@@ -18,7 +18,7 @@ public class EnterTheAbyssPrincipal extends Game {
     @Override
     public void create() {
         batch = new SpriteBatch();
-        setScreen(new PantallaJuego(this));
+        setScreen(new MenuInicio(this));
     }
 
     @Override

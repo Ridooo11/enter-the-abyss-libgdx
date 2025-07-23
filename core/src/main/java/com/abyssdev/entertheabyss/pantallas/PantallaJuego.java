@@ -4,6 +4,7 @@ import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.logica.ManejoEntradas;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.GL20;
@@ -47,6 +48,10 @@ public class PantallaJuego extends Pantalla {
         juego.batch.begin();
         jugador.dibujar(juego.batch);
         juego.batch.end();
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            juego.setScreen(new PantallaPausa(juego, this));
+        }
     }
 
     @Override
