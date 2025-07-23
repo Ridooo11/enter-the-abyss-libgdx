@@ -13,7 +13,7 @@ public class MenuInicio extends ScreenAdapter {
 
     private final EnterTheAbyssPrincipal juego;
     private SpriteBatch batch;
-
+    private BitmapFont font;
 
     public MenuInicio(EnterTheAbyssPrincipal juego) {
         this.juego = juego;
