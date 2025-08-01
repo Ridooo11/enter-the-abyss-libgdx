@@ -52,6 +52,13 @@ public class PantallaJuego extends Pantalla {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             juego.setScreen(new PantallaPausa(juego, this));
         }
+
+        // --- NUEVO CÓDIGO PARA ABRIR EL ÁRBOL DE HABILIDADES ---
+        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            // Pasamos la instancia de la pantalla de juego y el objeto jugador
+            juego.setScreen(new PantallaArbolHabilidades(juego, this, jugador));
+        }
+        // --------------------------------------------------------
     }
 
     @Override
@@ -62,7 +69,6 @@ public class PantallaJuego extends Pantalla {
 
     @Override
     public void show() {
-        // Cargamos el mapa. Creamos el render y la camara.
         renderer = new OrthogonalTiledMapRenderer(crearMapa("maps/sala1.tmx"), 1 / TILE_SIZE);
         camara = new OrthographicCamera();
 
@@ -70,7 +76,6 @@ public class PantallaJuego extends Pantalla {
         int mapaAncho = capa.getWidth();
         int mapaAlto = capa.getHeight();
 
-        // Usamos FitViewport basado en tamaño del mapa
         float aspectRatio = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
         float viewportHeight = mapaAlto;
         float viewportWidth = viewportHeight * aspectRatio;
@@ -82,23 +87,23 @@ public class PantallaJuego extends Pantalla {
 
         viewport = new FitViewport(viewportWidth, viewportHeight, camara);
 
-        float mapaCentroX = mapaAncho / 2f;
-        float mapaCentroY = mapaAlto / 2f;
-
-        jugador = new Jugador();
-        jugador.setX(mapaCentroX);
-        jugador.setY(mapaCentroY);
+        if (jugador == null) {
+            float mapaCentroX = mapaAncho / 2f;
+            float mapaCentroY = mapaAlto / 2f;
+            jugador = new Jugador();
+            jugador.setX(mapaCentroX);
+            jugador.setY(mapaCentroY);
+        }
 
         camara.position.set(jugador.getX(), jugador.getY(), 0);
         camara.update();
 
         Gdx.input.setInputProcessor(new ManejoEntradas(jugador));
-
     }
 
     @Override
     public void hide() {
-        dispose();
+        // No hacer nada aquí para no perder el estado del juego
     }
 
     @Override
@@ -138,5 +143,4 @@ public class PantallaJuego extends Pantalla {
         camara.position.set(x, y, 0);
         camara.update();
     }
-
 }
