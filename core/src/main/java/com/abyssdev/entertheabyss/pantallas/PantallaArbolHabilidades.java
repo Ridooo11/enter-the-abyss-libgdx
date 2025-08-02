@@ -16,13 +16,8 @@ import com.badlogic.gdx.math.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Pantalla para el árbol de habilidades del personaje.
- * Permite al jugador gastar puntos para mejorar sus atributos.
- */
-public class PantallaArbolHabilidades extends ScreenAdapter {
+public class PantallaArbolHabilidades extends Pantalla {
 
-    private final EnterTheAbyssPrincipal juego;
     private final PantallaJuego pantallaJuego;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
@@ -66,7 +61,7 @@ public class PantallaArbolHabilidades extends ScreenAdapter {
     private GlyphLayout layout;
 
     public PantallaArbolHabilidades(EnterTheAbyssPrincipal juego, PantallaJuego pantallaJuego, Jugador jugador) {
-        this.juego = juego;
+        super(juego);
         this.pantallaJuego = pantallaJuego;
         this.jugador = jugador;
     }

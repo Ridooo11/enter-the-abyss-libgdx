@@ -8,11 +8,19 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Rectangle; // Importar Rectangle para el hitbox
+import com.badlogic.gdx.utils.Array;
 
 public class Jugador {
     private Vector2 posicion;
     private float ancho = 3f, alto = 3f;
     private final float velocidad = 5f;
+
+    // HITBOX
+    private final float anchoHitbox = 1f;
+    private final float altoHitbox = 1f;
+    private final float offsetHitboxX = 1f;
+    private final float offsetHitboxY = .5f;
+
 
     private boolean arriba, abajo, izquierda, derecha;
 
@@ -131,7 +139,7 @@ public class Jugador {
         }
     }
 
-    public void update(float delta, TiledMapTileLayer capaColision) {
+    public void update(float delta, Array<Rectangle> colisiones) {
         float dx = 0, dy = 0;
         if (arriba) dy += 1;
         if (abajo) dy -= 1;
@@ -141,6 +149,36 @@ public class Jugador {
         if (dx != 0 && dy != 0) {
             dx *= 0.7071f;
             dy *= 0.7071f;
+        }
+
+
+        float nuevaX = posicion.x + dx * velocidad * delta;
+        float nuevaY = posicion.y + dy * velocidad * delta;
+
+        Rectangle hitboxX = new Rectangle(nuevaX + offsetHitboxX, posicion.y + offsetHitboxY, anchoHitbox, altoHitbox);
+        Rectangle hitboxY = new Rectangle(posicion.x + offsetHitboxX, nuevaY + offsetHitboxY, anchoHitbox, altoHitbox);
+
+
+        boolean colisionX = false;
+        for (Rectangle r : colisiones) {
+            if (r.overlaps(hitboxX)) {
+                colisionX = true;
+                break;
+            }
+        }
+        if (!colisionX) {
+            posicion.x = nuevaX;
+        }
+
+        boolean colisionY = false;
+        for (Rectangle r : colisiones) {
+            if (r.overlaps(hitboxY)) {
+                colisionY = true;
+                break;
+            }
+        }
+        if (!colisionY) {
+            posicion.y = nuevaY;
         }
 
         boolean estaMoviendo = (dx != 0 || dy != 0);
@@ -186,9 +224,6 @@ public class Jugador {
         } else {
             estadoTiempo += delta;
         }
-
-        posicion.x += dx * velocidad * delta;
-        posicion.y += dy * velocidad * delta;
     }
 
     public void dibujar(SpriteBatch batch) {

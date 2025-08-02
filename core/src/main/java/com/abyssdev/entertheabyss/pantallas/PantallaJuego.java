@@ -9,10 +9,15 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -24,6 +29,8 @@ public class PantallaJuego extends Pantalla {
     private AssetManager assetManager;
     private TiledMap mapa;
     private OrthogonalTiledMapRenderer renderer;
+
+    private Array<Rectangle> rectangulosColision = new Array<>();
 
     private final float TILE_SIZE = 16f; // en píxeles
 
@@ -39,9 +46,26 @@ public class PantallaJuego extends Pantalla {
         renderer.setView(camara);
         renderer.render();
 
-        TiledMapTileLayer capaColisionable = (TiledMapTileLayer) mapa.getLayers().get("tileColision");
+        // COLISIONES
+        MapObjects objetos = mapa.getLayers().get("colisiones").getObjects();
 
-        jugador.update(delta, capaColisionable);
+        for (MapObject objeto : objetos) {
+            if (!(objeto instanceof RectangleMapObject)) continue;
+
+            if (objeto.getProperties().containsKey("colision") && objeto.getProperties().get("colision", Boolean.class)) {
+                Rectangle rectOriginal = ((RectangleMapObject) objeto).getRectangle();
+                Rectangle rectEscalado = new Rectangle(
+                    rectOriginal.x / TILE_SIZE,
+                    rectOriginal.y / TILE_SIZE,
+                    rectOriginal.width / TILE_SIZE,
+                    rectOriginal.height / TILE_SIZE
+                );
+                rectangulosColision.add(rectEscalado);
+
+            }
+        }
+
+        jugador.update(delta, rectangulosColision);
         actualizarCamara();
 
         juego.batch.setProjectionMatrix(camara.combined);

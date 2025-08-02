@@ -6,15 +6,16 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
-public class MenuInicio extends ScreenAdapter {
+public class MenuInicio extends Pantalla {
 
-    private final EnterTheAbyssPrincipal juego;
-    private SpriteBatch batch;
     private BitmapFont font;
     private Texture fondo;
 
@@ -24,17 +25,25 @@ public class MenuInicio extends ScreenAdapter {
     private boolean mostrarRojo = true;
 
     private GlyphLayout layout;
+    private Viewport viewport;
+    private OrthographicCamera camara;
 
     public MenuInicio(EnterTheAbyssPrincipal juego) {
-        this.juego = juego;
+        super(juego);
     }
 
     @Override
     public void show() {
-        batch = new SpriteBatch();
-
         font = new BitmapFont(); // Fuente por defecto
         font.getData().setScale(2.5f); // Aumentar tamaño de fuente
+
+
+        camara = new OrthographicCamera();
+        viewport = new FitViewport(800, 600, camara); // Resolución lógica base
+        viewport.apply();
+        camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
+        camara.update();
+
 
         fondo = new Texture(Gdx.files.internal("Fondos/ImagenMenuInicio.PNG"));
         layout = new GlyphLayout();
@@ -53,11 +62,19 @@ public class MenuInicio extends ScreenAdapter {
 
         manejarInput();
 
-        batch.begin();
-        batch.draw(fondo, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camara.update();
+        juego.batch.setProjectionMatrix(camara.combined);
 
-        float centerX = Gdx.graphics.getWidth() / 2f;
-        float centerY = Gdx.graphics.getHeight() / 2f -100;
+
+        float ancho = viewport.getWorldWidth();
+        float alto = viewport.getWorldHeight();
+
+        juego.batch.begin();
+        juego.batch.draw(fondo, 0, 0, ancho, alto);
+
+
+        float centerX = viewport.getWorldWidth() / 2f;
+        float centerY = viewport.getWorldHeight() / 2f - 100;
 
         for (int i = 0; i < opciones.length; i++) {
             String texto = opciones[i];
@@ -75,10 +92,17 @@ public class MenuInicio extends ScreenAdapter {
                 font.setColor(Color.WHITE);
             }
 
-            font.draw(batch, texto, x, y);
+            font.draw(juego.batch, texto, x, y);
         }
 
-        batch.end();
+        juego.batch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+        camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
+        camara.update();
     }
 
     private void manejarInput() {
@@ -101,7 +125,6 @@ public class MenuInicio extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        batch.dispose();
         font.dispose();
         fondo.dispose();
     }

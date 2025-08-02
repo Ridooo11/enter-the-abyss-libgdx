@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="35">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="46">
  <tileset firstgid="1" source="texturas.tsx"/>
  <layer id="2" name="Piso" width="30" height="20">
   <data encoding="csv">
@@ -121,29 +121,62 @@
 3221225491,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225490,3221225489
 </data>
  </layer>
- <objectgroup id="8" name="Objetos">
-  <object id="31" x="226.727" y="144.364">
-   <polygon points="0,0 -0.181818,15.2727 12.9091,15.2727 13.0909,0"/>
-  </object>
-  <object id="33" x="226.364" y="160.182">
-   <polygon points="0,0 0,15.2727 13.4545,15.4545 13.4545,0.181818"/>
-  </object>
- </objectgroup>
- <objectgroup id="9" name="Bordes">
+ <objectgroup id="9" name="colisiones">
   <object id="6" x="475.333" y="20.6667" height="13.3333"/>
-  <object id="12" x="464.5" y="12" width="4" height="308.5"/>
-  <object id="14" x="11.5" y="12.5" width="4" height="307.5"/>
-  <object id="16" x="376.545" y="22"/>
-  <object id="17" x="424.727" y="22"/>
-  <object id="18" x="328.909" y="21.8182"/>
-  <object id="19" x="279.455" y="22.1818"/>
-  <object id="20" x="200.545" y="22"/>
-  <object id="21" x="152.182" y="22.1818"/>
-  <object id="22" x="55.6364" y="22"/>
-  <object id="23" x="104.727" y="22.1818"/>
-  <object id="26" x="63.8182" y="53.0909" width="16" height="31.2727"/>
-  <object id="27" x="64.1818" y="212.727" width="15.8182" height="32.5455"/>
-  <object id="28" x="399.818" y="212.909" width="16.3636" height="32.1818"/>
-  <object id="29" x="400.182" y="52.9091" width="16" height="32"/>
+  <object id="12" x="464.5" y="12" width="4" height="308.5">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="14" x="11.5" y="12.5" width="4" height="307.5">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="26" x="66.3182" y="52.8864" width="11.25" height="15.4772">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="35" x="225.976" y="144.155" width="13.1028" height="3.16879">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="36" x="225.838" y="156.416" width="13.498" height="7.10063">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="37" x="17.7576" y="302.962" width="447.833" height="3.94694">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="38" x="256.459" y="11.822" width="207.083" height="3.68937">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="39" x="15.9585" y="12.1099" width="207.083" height="3.96208">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="43" x="66.375" y="213.261" width="11.25" height="15.4772">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="44" x="402.625" y="53.0114" width="11.25" height="15.4772">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="45" x="402.125" y="213.261" width="11.25" height="15.4772">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

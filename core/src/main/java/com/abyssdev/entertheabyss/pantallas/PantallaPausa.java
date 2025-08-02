@@ -6,16 +6,17 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
-public class PantallaPausa extends ScreenAdapter {
+public class PantallaPausa extends Pantalla {
 
-    private final EnterTheAbyssPrincipal juego;
     private final PantallaJuego pantallaJuego;
-    private SpriteBatch batch;
     private BitmapFont font;
     private Texture fondoPausa;
 
@@ -27,16 +28,24 @@ public class PantallaPausa extends ScreenAdapter {
 
     private GlyphLayout layout;
 
+    private Viewport viewport;
+    private OrthographicCamera camara;
+
     public PantallaPausa(EnterTheAbyssPrincipal juego, PantallaJuego pantallaJuego) {
-        this.juego = juego;
+        super(juego);
         this.pantallaJuego = pantallaJuego;
     }
 
     @Override
     public void show() {
-        batch = new SpriteBatch();
         font = new BitmapFont();
-        font.getData().setScale(2.2f); // Tamaño grande
+        font.getData().setScale(2.2f);
+
+        camara = new OrthographicCamera();
+        viewport = new FitViewport(800, 600, camara); // Resolución lógica base
+        viewport.apply();
+        camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
+        camara.update();
 
         fondoPausa = new Texture("Fondos/ImagenPantallaPausa.PNG");
         layout = new GlyphLayout();
@@ -55,12 +64,18 @@ public class PantallaPausa extends ScreenAdapter {
 
         manejarInput();
 
-        batch.begin();
+        camara.update();
+        juego.batch.setProjectionMatrix(camara.combined);
 
-        batch.draw(fondoPausa, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        float centerX = Gdx.graphics.getWidth() / 2f;
-        float centerY = Gdx.graphics.getHeight() / 2f - 80; // Posición vertical base
+        float ancho = viewport.getWorldWidth();
+        float alto = viewport.getWorldHeight();
+
+        juego.batch.begin();
+        juego.batch.draw(fondoPausa, 0, 0, ancho, alto);
+
+        float centerX = ancho / 2f;
+        float centerY = alto / 2f - 80;
 
         for (int i = 0; i < opciones.length; i++) {
             String texto = opciones[i];
@@ -74,10 +89,17 @@ public class PantallaPausa extends ScreenAdapter {
                 font.setColor(Color.WHITE);
             }
 
-            font.draw(batch, texto, x, y);
+            font.draw(juego.batch, texto, x, y);
         }
 
-        batch.end();
+        juego.batch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+        camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
+        camara.update();
     }
 
     private void manejarInput() {
@@ -110,7 +132,6 @@ public class PantallaPausa extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        batch.dispose();
         font.dispose();
         fondoPausa.dispose();
     }
