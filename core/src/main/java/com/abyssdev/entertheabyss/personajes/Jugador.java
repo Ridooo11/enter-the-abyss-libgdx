@@ -14,23 +14,16 @@ public class Jugador {
     private Vector2 posicion;
     private float ancho = 3f, alto = 3f;
     private final float velocidad = 5f;
-
     // HITBOX
     private final float anchoHitbox = 1f;
     private final float altoHitbox = 1f;
     private final float offsetHitboxX = 1f;
     private final float offsetHitboxY = .5f;
-
-
+    // MOVIMIENTO
     private boolean arriba, abajo, izquierda, derecha;
-
     private Texture hojaSprite;
     private Animation<TextureRegion>[][] animaciones;
     private float estadoTiempo;
-
-    private enum Direccion { ABAJO, IZQUIERDA, DERECHA, ARRIBA }
-    private enum Accion {ESTATICO, CAMINAR, ATAQUE, MUERTE }
-
     private Direccion direccionActual = Direccion.ABAJO;
     private Accion accionActual = Accion.ESTATICO;
 

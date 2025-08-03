@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class MenuInicio extends Pantalla {
@@ -37,9 +38,8 @@ public class MenuInicio extends Pantalla {
         font = new BitmapFont(); // Fuente por defecto
         font.getData().setScale(2.5f); // Aumentar tamaño de fuente
 
-
         camara = new OrthographicCamera();
-        viewport = new FitViewport(800, 600, camara); // Resolución lógica base
+        viewport = new FitViewport(640, 480, camara); // Resolución lógica base
         viewport.apply();
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
@@ -100,7 +100,7 @@ public class MenuInicio extends Pantalla {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
+        viewport.update(width, height, true);
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
     }

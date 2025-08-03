@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
+import com.abyssdev.entertheabyss.habilidades.Habilidad;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -23,32 +24,10 @@ public class PantallaArbolHabilidades extends Pantalla {
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     private Texture fondo;
-
-    // Referencia al jugador para modificar sus atributos
-    private Jugador jugador;
-
+    private Jugador jugador; // Referencia del jugador para modificar atributos
     // Estructura de datos para representar el árbol de habilidades
-    private static class Habilidad {
-        String nombre;
-        String descripcion;
-        int costo;
-        Texture icono;
-        // Otras propiedades como el nivel actual, si está desbloqueado, etc.
-        boolean desbloqueado = false;
-        int nivelActual = 0;
-        int nivelMaximo = 3;
-
-        public Habilidad(String nombre, String descripcion, int costo, String iconoPath) {
-            this.nombre = nombre;
-            this.descripcion = descripcion;
-            this.costo = costo;
-            this.icono = new Texture(iconoPath);
-        }
-    }
-
     // El árbol de habilidades, dividido en 3 ramas principales
     private Map<String, Habilidad> habilidades = new HashMap<>();
-
     // Variables para la navegación
     private int filaSeleccionada = 0;
     private int columnaSeleccionada = 0;
@@ -74,10 +53,10 @@ public class PantallaArbolHabilidades extends Pantalla {
         font.getData().setScale(1.2f);
         layout = new GlyphLayout();
 
-        // Cargar el fondo y los íconos de las habilidades
+        // Cargar el fondo
         fondo = new Texture("Fondos/FondoArbol.PNG");
 
-        // Inicializar las habilidades (usando iconos de ejemplo)
+        // Inicializar las habilidades
         habilidades.put("Vida", new Habilidad("Vida Extra", "Aumenta la salud máxima del jugador.", 50, "imagenes/corazon.png"));
         habilidades.put("Defensa", new Habilidad("Defensa", "Reduce el daño recibido.", 100, "imagenes/escudo.png"));
         habilidades.put("Regen", new Habilidad("Regeneración", "Regenera salud lentamente.", 150, "imagenes/corazonDorado.PNG"));
@@ -89,7 +68,7 @@ public class PantallaArbolHabilidades extends Pantalla {
         habilidades.put("Rapidez", new Habilidad("Evasión", "Nueva habilidad de rodar.", 150, "imagenes/botasDoradas.PNG"));
         // Aquí puedes agregar más habilidades y conectarlas lógicamente.
 
-        // Simular que algunas habilidades ya están desbloqueadas
+        // Simular que algunas habilidades ya estan desbloqueadas
         habilidades.get("Vida").desbloqueado = true;
         habilidades.get("Ataque").desbloqueado = true;
         habilidades.get("Velocidad").desbloqueado = true;
@@ -188,7 +167,7 @@ public class PantallaArbolHabilidades extends Pantalla {
         batch.begin();
 
         // Dibujar los nodos de habilidad
-        // Esto es una simulación. En una implementación real, se usaría un arreglo 2D de habilidades
+        // Esto es una simulación. En una implementación real, se usaría un array de habilidades
         dibujarNodo(0, 0, "Vida");
         dibujarNodo(1, 0, "Ataque");
         dibujarNodo(2, 0, "Velocidad");
@@ -225,12 +204,12 @@ public class PantallaArbolHabilidades extends Pantalla {
         }
 
         batch.setColor(color);
-        batch.draw(habilidad.icono, x, y, altoNodo, altoNodo);
+        batch.draw(habilidad.getIcono(), x, y, altoNodo, altoNodo);
         batch.setColor(Color.WHITE); // Resetear el color
 
         // Dibujar el nombre de la habilidad debajo
         font.getData().setScale(0.8f);
-        layout.setText(font, habilidad.nombre);
+        layout.setText(font, habilidad.getNombre());
         font.draw(batch, layout, x + (altoNodo - layout.width) / 2, y - 10);
     }
 
@@ -257,12 +236,12 @@ public class PantallaArbolHabilidades extends Pantalla {
 
             // Simulación de compra
             if (habilidad.desbloqueado && habilidad.nivelActual < habilidad.nivelMaximo) {
-                Gdx.app.log("Habilidades", "Habilidad comprada: " + habilidad.nombre);
+                Gdx.app.log("Habilidades", "Habilidad comprada: " + habilidad.getNombre());
                 habilidad.nivelActual++;
             } else if (!habilidad.desbloqueado) {
-                Gdx.app.log("Habilidades", "Habilidad bloqueada: " + habilidad.nombre);
+                Gdx.app.log("Habilidades", "Habilidad bloqueada: " + habilidad.getNombre());
             } else {
-                Gdx.app.log("Habilidades", "Habilidad en nivel máximo: " + habilidad.nombre);
+                Gdx.app.log("Habilidades", "Habilidad en nivel máximo: " + habilidad.getNombre());
             }
         }
 
@@ -279,8 +258,8 @@ public class PantallaArbolHabilidades extends Pantalla {
         font.dispose();
         fondo.dispose();
         for (Habilidad h : habilidades.values()) {
-            if (h.icono != null) {
-                h.icono.dispose();
+            if (h.getIcono() != null) {
+                h.getIcono().dispose();
             }
         }
     }

@@ -28,11 +28,13 @@ public class PantallaJuego extends Pantalla {
     private Jugador jugador;
     private AssetManager assetManager;
     private TiledMap mapa;
+    private int mapaAncho;
+    private int mapaAlto;
     private OrthogonalTiledMapRenderer renderer;
 
     private Array<Rectangle> rectangulosColision = new Array<>();
 
-    private final float TILE_SIZE = 16f; // en píxeles
+    private final float TILE_SIZE = 16f;
 
     public PantallaJuego(EnterTheAbyssPrincipal juego) {
         super(juego);
@@ -60,12 +62,12 @@ public class PantallaJuego extends Pantalla {
                     rectOriginal.width / TILE_SIZE,
                     rectOriginal.height / TILE_SIZE
                 );
-                rectangulosColision.add(rectEscalado);
+                rectangulosColision.add(rectEscalado); // Se agrega al ArrayList la hitbox correctamente escalada
 
             }
         }
 
-        jugador.update(delta, rectangulosColision);
+        jugador.update(delta, rectangulosColision); // Pasamos el ArrayList con los objetos que son colisionables
         actualizarCamara();
 
         juego.batch.setProjectionMatrix(camara.combined);
@@ -77,18 +79,12 @@ public class PantallaJuego extends Pantalla {
             juego.setScreen(new PantallaPausa(juego, this));
         }
 
-        // --- NUEVO CÓDIGO PARA ABRIR EL ÁRBOL DE HABILIDADES ---
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
             // Pasamos la instancia de la pantalla de juego y el objeto jugador
             juego.setScreen(new PantallaArbolHabilidades(juego, this, jugador));
         }
-        // --------------------------------------------------------
-    }
 
-    @Override
-    public void resize(int width, int height) {
-        viewport.update(width, height, true);
-        actualizarCamara();
     }
 
     @Override
@@ -96,11 +92,11 @@ public class PantallaJuego extends Pantalla {
         renderer = new OrthogonalTiledMapRenderer(crearMapa("maps/sala1.tmx"), 1 / TILE_SIZE);
         camara = new OrthographicCamera();
 
-        TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(0);
-        int mapaAncho = capa.getWidth();
-        int mapaAlto = capa.getHeight();
+        TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(0); // Obtenemos la primer capa para determinar ancho y alto del mapa
+        mapaAncho = capa.getWidth();
+        mapaAlto = capa.getHeight();
 
-        float aspectRatio = (float) Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
+        float aspectRatio = 16f / 9f; // Relacion aspecto fija que respeta el juego. (16:9)
         float viewportHeight = mapaAlto;
         float viewportWidth = viewportHeight * aspectRatio;
 
@@ -131,6 +127,12 @@ public class PantallaJuego extends Pantalla {
     }
 
     @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
+        actualizarCamara();
+    }
+
+    @Override
     public void dispose() {
         renderer.dispose();
         mapa.dispose();
@@ -148,9 +150,9 @@ public class PantallaJuego extends Pantalla {
         return mapa;
     }
     private void actualizarCamara() {
-        TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(0);
+        /*TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(0);
         int mapaAncho = capa.getWidth();
-        int mapaAlto = capa.getHeight();
+        int mapaAlto = capa.getHeight();*/
 
         float x = jugador.getX();
         float y = jugador.getY();

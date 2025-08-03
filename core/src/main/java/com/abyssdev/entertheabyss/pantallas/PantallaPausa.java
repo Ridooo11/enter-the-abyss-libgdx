@@ -20,6 +20,7 @@ public class PantallaPausa extends Pantalla {
     private BitmapFont font;
     private Texture fondoPausa;
 
+
     private final String[] opciones = {"Continuar", "Guardar", "Salir"};
     private int opcionSeleccionada = 0;
 
