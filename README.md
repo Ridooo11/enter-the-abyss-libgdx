@@ -13,9 +13,19 @@ Enter the Abyss es un juego de acción y supervivencia con elementos roguelike, 
 
 Este videojuego será programado en Java, utilizando la versión 8, e integrará el framework LibGDX en su versión 1.13.1 para escritorio.
 
-## Wiki
+# Características implementadas (Prototipo jugable)
 
-Podes encontrar informacion mas detallada en la [wiki](https://github.com/Ridooo11/enter-the-abyss-libgdx/wiki) 
+- Movimiento del personaje con teclado usando `InputProcessor`.
+- Animaciones del jugador mediante spritesheets.
+- Carga y renderizado de mapas desde Tiled (`.tmx`).
+- Escalado de mapa y cámara con Viewport, adaptable a múltiples resoluciones.
+- Cámara que sigue al jugador dentro de los límites del mapa.
+- Detección de colisiones entre el jugador y los objetos del mapa.
+- Estructura multiventana (`Screen`): Menú principal, juego, pausa y árbol de habilidades.
+- Lógica de pausa/reanudación y cambio de pantallas con teclas.
+- Reutilización eficiente de `SpriteBatch` entre pantallas.
+
+> El proyecto sigue una estructura modular orientada a facilitar la expansión con nuevas salas, personajes y mecánicas.
 
 ## Clonar el repositorio
 
@@ -42,5 +52,9 @@ Luego en tu IDE deberas abrirlo como un proyecto de Gradle:
  o Anda a "File" > "Import...".<br>
  o Selecciona "Gradle" > "Existing Gradle Project".<br>
  o Navega hasta la carpeta raíz del proyecto generado y seguí los pasos del asistente.
+
+## Wiki
+
+Podes encontrar informacion mas detallada en la [wiki](https://github.com/Ridooo11/enter-the-abyss-libgdx/wiki) 
 
 
