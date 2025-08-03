@@ -13,7 +13,7 @@ Enter the Abyss es un juego de acción y supervivencia con elementos roguelike, 
 
 Este videojuego será programado en Java, utilizando la versión 8, e integrará el framework LibGDX en su versión 1.13.1 para escritorio.
 
-# Características implementadas (Prototipo jugable)
+## Características implementadas (Prototipo jugable)
 
 - Movimiento del personaje con teclado usando `InputProcessor`.
 - Animaciones del jugador mediante spritesheets.
