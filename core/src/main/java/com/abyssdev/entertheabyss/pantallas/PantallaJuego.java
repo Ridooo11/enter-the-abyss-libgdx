@@ -2,6 +2,7 @@ package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.logica.ManejoEntradas;
+import com.abyssdev.entertheabyss.personajes.Enemigo;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -16,10 +17,13 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import java.util.ArrayList;
 
 public class PantallaJuego extends Pantalla {
 
@@ -31,7 +35,7 @@ public class PantallaJuego extends Pantalla {
     private int mapaAncho;
     private int mapaAlto;
     private OrthogonalTiledMapRenderer renderer;
-
+    private ArrayList<Enemigo> enemigos;
     private Array<Rectangle> rectangulosColision = new Array<>();
 
     private final float TILE_SIZE = 16f;
@@ -67,11 +71,22 @@ public class PantallaJuego extends Pantalla {
             }
         }
 
+        for (int i = enemigos.size() - 1; i >= 0; i--) {
+            Enemigo enemigo = enemigos.get(i);
+            enemigo.actualizar(delta, jugador.getPosicion(), rectangulosColision, enemigos);
+            if (enemigo.debeEliminarse()) {
+                enemigos.remove(i);
+            }
+        }
+
         jugador.update(delta, rectangulosColision); // Pasamos el ArrayList con los objetos que son colisionables
         actualizarCamara();
 
         juego.batch.setProjectionMatrix(camara.combined);
         juego.batch.begin();
+        for (Enemigo enemigo : enemigos) {
+            enemigo.renderizar(juego.batch);
+        }
         jugador.dibujar(juego.batch);
         juego.batch.end();
 
@@ -95,6 +110,13 @@ public class PantallaJuego extends Pantalla {
         TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(0); // Obtenemos la primer capa para determinar ancho y alto del mapa
         mapaAncho = capa.getWidth();
         mapaAlto = capa.getHeight();
+        enemigos = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            float x = MathUtils.random(1f, mapaAncho - 2f);
+            float y = MathUtils.random(1f, mapaAlto - 2f);
+            enemigos.add(new Enemigo(x, y));
+        }
 
         float aspectRatio = 16f / 9f; // Relacion aspecto fija que respeta el juego. (16:9)
         float viewportHeight = mapaAlto;
