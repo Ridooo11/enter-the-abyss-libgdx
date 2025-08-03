@@ -27,6 +27,9 @@ Este videojuego será programado en Java, utilizando la versión 8, e integrará
 
 > El proyecto sigue una estructura modular orientada a facilitar la expansión con nuevas salas, personajes y mecánicas.
 
+## Video desmostrativo del juego
+- https://drive.google.com/file/d/1gN7TS5AoHX75s-pRf-d_Zs6uzK27-uly/view?usp=drive_link
+
 ## Clonar el repositorio
 
 Primero en tu terminal vas a tener que seleccionar la carpeta donde queres clonar el repositorio, con el siguente comando:
