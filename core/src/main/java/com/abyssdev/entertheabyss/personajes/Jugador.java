@@ -14,6 +14,13 @@ public class Jugador {
     private Vector2 posicion;
     private float ancho = 3f, alto = 3f;
     private final float velocidad = 5f;
+
+    private int vida = 100;           // Vida actual
+    private int vidaMaxima = 100;     // Vida máxima
+    private int municionActual = 30;  // Balas en el cargador
+    private int municionMaxima = 30;  // Capacidad del cargador
+    private int monedas = 0;          // Monedas recolectadas
+
     // HITBOX
     private final float anchoHitbox = 1f;
     private final float altoHitbox = 1f;
@@ -291,7 +298,53 @@ public class Jugador {
             hitboxAtaque.setSize(0,0);
         }
     }
+    // --- GETTERS PARA EL HUD ---
 
+    public int getVida() {
+        return vida;
+    }
+
+    public int getVidaMaxima() {
+        return vidaMaxima;
+    }
+
+    public int getMunicionActual() {
+        return municionActual;
+    }
+
+    public int getMunicionMaxima() {
+        return municionMaxima;
+    }
+
+    public int getMonedas() {
+        return monedas;
+    }
+
+    // --- SETTERS (opcionales, útiles para pickups o daño) ---
+
+    public void setVida(int vida) {
+        this.vida = Math.max(0, Math.min(vida, vidaMaxima)); // No permitir vida < 0 o > max
+    }
+
+    public void modificarVida(int cantidad) {
+        setVida(this.vida + cantidad);
+    }
+
+    public void setMunicionActual(int municion) {
+        this.municionActual = Math.max(0, Math.min(municion, municionMaxima));
+    }
+
+    public void modificarMunicion(int cantidad) {
+        setMunicionActual(this.municionActual + cantidad);
+    }
+
+    public void setMonedas(int monedas) {
+        this.monedas = Math.max(0, monedas);
+    }
+
+    public void modificarMonedas(int cantidad) {
+        setMonedas(this.monedas + cantidad);
+    }
 
     public void dispose() {
         if (hojaSprite != null) {
