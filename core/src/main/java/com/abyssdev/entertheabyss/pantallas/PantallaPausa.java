@@ -20,7 +20,6 @@ public class PantallaPausa extends Pantalla {
     private BitmapFont font;
     private Texture fondoPausa;
 
-
     private final String[] opciones = {"Continuar", "Guardar", "Salir"};
     private int opcionSeleccionada = 0;
 
@@ -48,7 +47,7 @@ public class PantallaPausa extends Pantalla {
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
 
-        fondoPausa = new Texture("Fondos/ImagenPantallaPausa.PNG");
+        fondoPausa = new Texture("Fondos/pausa2.PNG");
         layout = new GlyphLayout();
     }
 
@@ -68,21 +67,21 @@ public class PantallaPausa extends Pantalla {
         camara.update();
         juego.batch.setProjectionMatrix(camara.combined);
 
-
         float ancho = viewport.getWorldWidth();
         float alto = viewport.getWorldHeight();
 
         juego.batch.begin();
         juego.batch.draw(fondoPausa, 0, 0, ancho, alto);
 
-        float centerX = ancho / 2f;
-        float centerY = alto / 2f - 80;
+        // ✅ Coordenadas fijas del marco (800x600)
+        float centerX = 400f; // 800 / 2
+        float centerY = 300f; // 600 / 2 - 80 (espacio arriba)
 
         for (int i = 0; i < opciones.length; i++) {
             String texto = opciones[i];
             layout.setText(font, texto);
             float x = centerX - layout.width / 2f;
-            float y = centerY + (opciones.length - 1 - i) * 60;
+            float y = centerY + (opciones.length - 1 - i) * 60 - 20; // Ajuste manual
 
             if (i == opcionSeleccionada && mostrarColor) {
                 font.setColor(Color.YELLOW);
