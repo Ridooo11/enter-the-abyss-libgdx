@@ -4,6 +4,7 @@ import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.logica.ManejoEntradas;
 import com.abyssdev.entertheabyss.personajes.Enemigo;
 import com.abyssdev.entertheabyss.personajes.Jugador;
+import com.abyssdev.entertheabyss.ui.Hud; // ✅ Import del HUD
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
@@ -40,6 +41,9 @@ public class PantallaJuego extends Pantalla {
 
     private final float TILE_SIZE = 16f;
 
+    // ✅ NUEVO: Instancia del HUD
+    private Hud hud;
+
     public PantallaJuego(EnterTheAbyssPrincipal juego) {
         super(juego);
     }
@@ -66,10 +70,10 @@ public class PantallaJuego extends Pantalla {
                     rectOriginal.width / TILE_SIZE,
                     rectOriginal.height / TILE_SIZE
                 );
-                rectangulosColision.add(rectEscalado); // Se agrega al ArrayList la hitbox correctamente escalada
-
+                rectangulosColision.add(rectEscalado);
             }
         }
+
 
         for (int i = enemigos.size() - 1; i >= 0; i--) {
             Enemigo enemigo = enemigos.get(i);
@@ -80,6 +84,9 @@ public class PantallaJuego extends Pantalla {
         }
 
         jugador.update(delta, rectangulosColision); // Pasamos el ArrayList con los objetos que son colisionables
+
+        jugador.update(delta, rectangulosColision);
+
         actualizarCamara();
 
         juego.batch.setProjectionMatrix(camara.combined);
@@ -90,16 +97,19 @@ public class PantallaJuego extends Pantalla {
         jugador.dibujar(juego.batch);
         juego.batch.end();
 
+        // ✅ DIBUJAR EL HUD (siempre al final, encima de todo)
+        if (hud != null) {
+            hud.update();
+            hud.draw(juego.batch);
+        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             juego.setScreen(new PantallaPausa(juego, this));
         }
 
-
         if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-            // Pasamos la instancia de la pantalla de juego y el objeto jugador
             juego.setScreen(new PantallaArbolHabilidades(juego, this, jugador));
         }
-
     }
 
     @Override
@@ -107,7 +117,7 @@ public class PantallaJuego extends Pantalla {
         renderer = new OrthogonalTiledMapRenderer(crearMapa("maps/sala1.tmx"), 1 / TILE_SIZE);
         camara = new OrthographicCamera();
 
-        TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(0); // Obtenemos la primer capa para determinar ancho y alto del mapa
+        TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(0);
         mapaAncho = capa.getWidth();
         mapaAlto = capa.getHeight();
         enemigos = new ArrayList<>();
@@ -118,7 +128,7 @@ public class PantallaJuego extends Pantalla {
             enemigos.add(new Enemigo(x, y));
         }
 
-        float aspectRatio = 16f / 9f; // Relacion aspecto fija que respeta el juego. (16:9)
+        float aspectRatio = 16f / 9f;
         float viewportHeight = mapaAlto;
         float viewportWidth = viewportHeight * aspectRatio;
 
@@ -141,6 +151,9 @@ public class PantallaJuego extends Pantalla {
         camara.update();
 
         Gdx.input.setInputProcessor(new ManejoEntradas(jugador));
+
+        // ✅ Inicializar el HUD con el viewport
+        hud = new Hud(jugador, viewport);
     }
 
     @Override
@@ -160,8 +173,12 @@ public class PantallaJuego extends Pantalla {
         mapa.dispose();
         assetManager.dispose();
         jugador.dispose();
-    }
 
+        // ✅ LIBERAR RECURSOS DEL HUD
+        if (hud != null) {
+            hud.dispose();
+        }
+    }
 
     private TiledMap crearMapa(String rutaArchivo) {
         assetManager = new AssetManager();
@@ -171,11 +188,8 @@ public class PantallaJuego extends Pantalla {
         mapa = assetManager.get(rutaArchivo);
         return mapa;
     }
-    private void actualizarCamara() {
-        /*TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(0);
-        int mapaAncho = capa.getWidth();
-        int mapaAlto = capa.getHeight();*/
 
+    private void actualizarCamara() {
         float x = jugador.getX();
         float y = jugador.getY();
 

@@ -8,12 +8,15 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,20 +27,20 @@ public class PantallaArbolHabilidades extends Pantalla {
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     private Texture fondo;
-    private Jugador jugador; // Referencia del jugador para modificar atributos
-    // Estructura de datos para representar el árbol de habilidades
-    // El árbol de habilidades, dividido en 3 ramas principales
+    private Jugador jugador;
     private Map<String, Habilidad> habilidades = new HashMap<>();
-    // Variables para la navegación
     private int filaSeleccionada = 0;
     private int columnaSeleccionada = 0;
     private final int MAX_FILAS = 3;
-    private final int MAX_COLUMNAS = 2; // Para 3 columnas de habilidades
+    private final int MAX_COLUMNAS = 2;
 
     private float tiempoParpadeo = 0;
     private boolean mostrarColor = true;
-
     private GlyphLayout layout;
+
+    // ✅ Nuevas variables para viewport y cámara
+    private Viewport viewport;
+    private OrthographicCamera camara;
 
     public PantallaArbolHabilidades(EnterTheAbyssPrincipal juego, PantallaJuego pantallaJuego, Jugador jugador) {
         super(juego);
@@ -66,12 +69,18 @@ public class PantallaArbolHabilidades extends Pantalla {
         habilidades.put("Velocidad", new Habilidad("Velocidad", "Aumenta la velocidad de movimiento.", 50, "imagenes/botas.PNG"));
         habilidades.put("Evasion", new Habilidad("Velocidad II", "Aumenta la velocidad de movimiento.", 100, "imagenes/botas2.PNG"));
         habilidades.put("Rapidez", new Habilidad("Evasión", "Nueva habilidad de rodar.", 150, "imagenes/botasDoradas.PNG"));
-        // Aquí puedes agregar más habilidades y conectarlas lógicamente.
 
-        // Simular que algunas habilidades ya estan desbloqueadas
+        // Simular que algunas habilidades ya están desbloqueadas
         habilidades.get("Vida").desbloqueado = true;
         habilidades.get("Ataque").desbloqueado = true;
         habilidades.get("Velocidad").desbloqueado = true;
+
+        // ✅ Configurar viewport y cámara
+        camara = new OrthographicCamera();
+        viewport = new FitViewport(1280, 720, camara); // Resolución base
+        viewport.apply();
+        camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
+        camara.update();
     }
 
     @Override
@@ -87,9 +96,13 @@ public class PantallaArbolHabilidades extends Pantalla {
 
         manejarInput();
 
+        // ✅ Aplicar viewport
+        viewport.apply();
+        batch.setProjectionMatrix(camara.combined);
+
         // Dibujar el fondo
         batch.begin();
-        batch.draw(fondo, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.draw(fondo, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         batch.end();
 
         // Dibujar la interfaz del árbol de habilidades
@@ -101,7 +114,7 @@ public class PantallaArbolHabilidades extends Pantalla {
         font.getData().setScale(2.0f);
         font.setColor(Color.WHITE);
         layout.setText(font, "Árbol de Habilidades");
-        font.draw(batch, layout, (Gdx.graphics.getWidth() - layout.width) / 2, Gdx.graphics.getHeight() - 40);
+        font.draw(batch, layout, (viewport.getWorldWidth() - layout.width) / 2, viewport.getWorldHeight() - 40);
 
         // Nivel y puntos de habilidad del jugador (simulados)
         font.getData().setScale(1.2f);
@@ -113,8 +126,8 @@ public class PantallaArbolHabilidades extends Pantalla {
     }
 
     private void dibujarArbolHabilidades() {
-        float anchoPantalla = Gdx.graphics.getWidth();
-        float altoPantalla = Gdx.graphics.getHeight();
+        float anchoPantalla = viewport.getWorldWidth();
+        float altoPantalla = viewport.getWorldHeight();
         float margen = 50f;
         float anchoColumna = (anchoPantalla - margen * 4) / 3;
         float altoNodo = 90f;
@@ -124,11 +137,10 @@ public class PantallaArbolHabilidades extends Pantalla {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
-        shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
+        shapeRenderer.setProjectionMatrix(camara.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         // Dibujar el fondo de las columnas
-        // Utiliza un color con un valor alfa (transparencia) para que se vea el fondo
         shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 0.6f);
         for (int i = 0; i < 3; i++) {
             float x = margen + i * (anchoColumna + margen);
@@ -167,7 +179,6 @@ public class PantallaArbolHabilidades extends Pantalla {
         batch.begin();
 
         // Dibujar los nodos de habilidad
-        // Esto es una simulación. En una implementación real, se usaría un array de habilidades
         dibujarNodo(0, 0, "Vida");
         dibujarNodo(1, 0, "Ataque");
         dibujarNodo(2, 0, "Velocidad");
@@ -185,8 +196,8 @@ public class PantallaArbolHabilidades extends Pantalla {
 
     private void dibujarNodo(int columna, int fila, String habilidadId) {
         Habilidad habilidad = habilidades.get(habilidadId);
-        float anchoPantalla = Gdx.graphics.getWidth();
-        float altoPantalla = Gdx.graphics.getHeight();
+        float anchoPantalla = viewport.getWorldWidth();
+        float altoPantalla = viewport.getWorldHeight();
         float margen = 50f;
         float anchoColumna = (anchoPantalla - margen * 4) / 3;
         float altoNodo = 80f;
@@ -215,32 +226,29 @@ public class PantallaArbolHabilidades extends Pantalla {
 
     private void manejarInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W)) {
-            filaSeleccionada = (filaSeleccionada - 1 + MAX_FILAS) % MAX_FILAS;
+            filaSeleccionada = Math.max(0, filaSeleccionada - 1);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S)) {
-            filaSeleccionada = (filaSeleccionada + 1) % MAX_FILAS;
+            filaSeleccionada = Math.min(MAX_FILAS - 1, filaSeleccionada + 1);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.A)) {
-            columnaSeleccionada = (columnaSeleccionada - 1 + MAX_COLUMNAS + 1) % (MAX_COLUMNAS + 1);
+            columnaSeleccionada = Math.max(0, columnaSeleccionada - 1);
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT) || Gdx.input.isKeyJustPressed(Input.Keys.D)) {
-            columnaSeleccionada = (columnaSeleccionada + 1) % (MAX_COLUMNAS + 1);
+            columnaSeleccionada = Math.min(MAX_COLUMNAS, columnaSeleccionada + 1);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            // Lógica para comprar la habilidad seleccionada
-            // Aquí puedes acceder al jugador para restarle puntos y aplicar la mejora
             String[] ids = {"Vida", "Ataque", "Velocidad", "Defensa", "Critico", "Evasion", "Regen", "Combo", "Rapidez"};
             String habilidadId = ids[columnaSeleccionada + filaSeleccionada * (MAX_COLUMNAS + 1)];
             Habilidad habilidad = habilidades.get(habilidadId);
 
-            // Simulación de compra
-            if (habilidad.desbloqueado && habilidad.nivelActual < habilidad.nivelMaximo) {
+            if (habilidad != null && habilidad.desbloqueado && habilidad.nivelActual < habilidad.nivelMaximo) {
                 Gdx.app.log("Habilidades", "Habilidad comprada: " + habilidad.getNombre());
                 habilidad.nivelActual++;
-            } else if (!habilidad.desbloqueado) {
+            } else if (habilidad != null && !habilidad.desbloqueado) {
                 Gdx.app.log("Habilidades", "Habilidad bloqueada: " + habilidad.getNombre());
-            } else {
+            } else if (habilidad != null) {
                 Gdx.app.log("Habilidades", "Habilidad en nivel máximo: " + habilidad.getNombre());
             }
         }
@@ -249,6 +257,13 @@ public class PantallaArbolHabilidades extends Pantalla {
         if (Gdx.input.isKeyJustPressed(Input.Keys.TAB) || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             juego.setScreen(pantallaJuego);
         }
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+        camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
+        camara.update();
     }
 
     @Override
