@@ -15,11 +15,12 @@ public class Jugador {
     private float ancho = 3f, alto = 3f;
     private final float velocidad = 5f;
 
-    private int vida = 100;           // Vida actual
-    private int vidaMaxima = 100;     // Vida máxima
-    private int municionActual = 30;  // Balas en el cargador
-    private int municionMaxima = 30;  // Capacidad del cargador
-    private int monedas = 0;          // Monedas recolectadas
+    private int vida = 100;
+    private int vidaMaxima = 100;
+    private int vidaMinima = 0;
+    private int municionActual = 30;
+    private int municionMaxima = 30;
+    private int monedas = 0;
 
     // HITBOX
     private final float anchoHitbox = 1f;
@@ -301,23 +302,24 @@ public class Jugador {
     // --- GETTERS PARA EL HUD ---
 
     public int getVida() {
-        return vida;
+        return this.vida;
     }
 
     public int getVidaMaxima() {
-        return vidaMaxima;
+        return this.vidaMaxima;
     }
+    public int getVidaMinima(){ return this.vidaMinima;}
 
     public int getMunicionActual() {
-        return municionActual;
+        return this.municionActual;
     }
 
     public int getMunicionMaxima() {
-        return municionMaxima;
+        return this.municionMaxima;
     }
 
     public int getMonedas() {
-        return monedas;
+        return this.monedas;
     }
 
     // --- SETTERS (opcionales, útiles para pickups o daño) ---
@@ -367,4 +369,10 @@ public class Jugador {
     public void moverAbajo(boolean activo) { this.abajo = activo; }
     public void moverIzquierda(boolean activo) { this.izquierda = activo; }
     public void moverDerecha(boolean activo) { this.derecha = activo; }
+
+    public void recibirDanio(int i) {
+        this.vida -=i;
+        System.out.println(this.vida);
+    }
+
 }

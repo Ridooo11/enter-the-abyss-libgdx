@@ -67,13 +67,13 @@ public class Enemigo {
         return anim;
     }
 
-    public void actualizar(float delta, Vector2 posicionJugador, Array<Rectangle> colisionesMapa, ArrayList<Enemigo> otrosEnemigos) {
+    public boolean actualizar(float delta, Vector2 posicionJugador, Array<Rectangle> colisionesMapa, ArrayList<Enemigo> otrosEnemigos) {
         tiempoEstado += delta;
         tiempoDesdeUltimoAtaque += delta;
 
         if (estado == Estado.MUERTO && animMuerte.isAnimationFinished(tiempoEstado)) {
             eliminar = true;
-            return;
+            return false;
         }
 
         if (estado == Estado.HIT && animHit.isAnimationFinished(tiempoEstado)) {
@@ -91,7 +91,7 @@ public class Enemigo {
                     cambiarEstado(Estado.ATAQUE);
                     tiempoDesdeUltimoAtaque = 0;
                     System.out.println("¡Jugador ha sido atacado!");
-                    // Aquí podés llamar a jugador.recibirDanio(10);
+                    return true;
                 }
             } else {
                 // Seguir caminando
@@ -131,6 +131,7 @@ public class Enemigo {
                 }
             }
         }
+        return false;
     }
 
     public void renderizar(SpriteBatch batch) {

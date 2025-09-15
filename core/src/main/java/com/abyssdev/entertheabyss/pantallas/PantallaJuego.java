@@ -77,7 +77,13 @@ public class PantallaJuego extends Pantalla {
 
         for (int i = enemigos.size() - 1; i >= 0; i--) {
             Enemigo enemigo = enemigos.get(i);
-            enemigo.actualizar(delta, jugador.getPosicion(), rectangulosColision, enemigos);
+            if (enemigo.actualizar(delta, jugador.getPosicion(), rectangulosColision, enemigos)) {
+                if(jugador.getVida() <= jugador.getVidaMinima() ){
+                    juego.setScreen(new MenuInicio(juego));
+                }
+                jugador.recibirDanio(10);
+            }
+
             if (enemigo.debeEliminarse()) {
                 enemigos.remove(i);
             }
