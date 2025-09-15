@@ -79,7 +79,7 @@ public class PantallaJuego extends Pantalla {
             Enemigo enemigo = enemigos.get(i);
             if (enemigo.actualizar(delta, jugador.getPosicion(), rectangulosColision, enemigos)) {
                 if(jugador.getVida() <= jugador.getVidaMinima() ){
-                    juego.setScreen(new MenuInicio(juego));
+                    juego.setScreen(new PantallaGameOver(juego));
                 }
                 jugador.recibirDanio(10);
             }

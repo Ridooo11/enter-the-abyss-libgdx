@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss;
 
 import com.abyssdev.entertheabyss.pantallas.MenuInicio;
+import com.abyssdev.entertheabyss.pantallas.PantallaGameOver;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
