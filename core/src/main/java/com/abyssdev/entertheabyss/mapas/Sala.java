@@ -1,13 +1,19 @@
 package com.abyssdev.entertheabyss.mapas;
 
+import com.abyssdev.entertheabyss.personajes.Enemigo;
+import com.badlogic.gdx.maps.objects.PointMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.math.MathUtils;
+
+import java.util.ArrayList;
 
 public class Sala {
 
@@ -16,6 +22,9 @@ public class Sala {
     private OrthogonalTiledMapRenderer renderer;
     private Array<Rectangle> colisiones;
     private Array<ZonaTransicion> zonasTransicion;
+    private ArrayList<Enemigo> enemigos;
+    private Array<SpawnPoint> spawnPoints;
+
     private float anchoTiles, altoTiles;
     private static final float TILE_SIZE = 16f;
 
@@ -24,6 +33,8 @@ public class Sala {
         cargarMapa(rutaTmx);
         cargarColisiones();
         cargarZonasTransicion();
+        cargarSpawnPoints();
+        generarEnemigos(5); // cantidad default
     }
 
     private void cargarMapa(String ruta) {
@@ -38,7 +49,7 @@ public class Sala {
     }
 
     private void cargarColisiones() {
-        colisiones = new Array<Rectangle>();
+        colisiones = new Array<>();
         MapObjects objetos = mapa.getLayers().get("colisiones").getObjects();
 
         for (MapObject objeto : objetos) {
@@ -47,27 +58,20 @@ public class Sala {
 
             RectangleMapObject rectObj = (RectangleMapObject) objeto;
             Rectangle rect = rectObj.getRectangle();
-            Rectangle rectEscalado = new Rectangle(
+            colisiones.add(new Rectangle(
                 rect.x / TILE_SIZE,
                 rect.y / TILE_SIZE,
                 rect.width / TILE_SIZE,
                 rect.height / TILE_SIZE
-            );
-            colisiones.add(rectEscalado);
+            ));
         }
     }
 
     private void cargarZonasTransicion() {
-        zonasTransicion = new Array<ZonaTransicion>();
-        MapObjects objetos = null;
+        zonasTransicion = new Array<>();
+        if (mapa.getLayers().get("transiciones") == null) return;
 
-        // Verificar si existe la capa "transiciones"
-        if (mapa.getLayers().get("transiciones") != null) {
-            objetos = mapa.getLayers().get("transiciones").getObjects();
-        } else {
-            return; // No hay transiciones definidas
-        }
-
+        MapObjects objetos = mapa.getLayers().get("transiciones").getObjects();
         for (MapObject objeto : objetos) {
             if (!(objeto instanceof RectangleMapObject)) continue;
             if (!objeto.getProperties().containsKey("destino")) continue;
@@ -75,15 +79,46 @@ public class Sala {
             RectangleMapObject rectObj = (RectangleMapObject) objeto;
             Rectangle rect = rectObj.getRectangle();
             String destino = objeto.getProperties().get("destino", String.class);
+            String spawnName = objeto.getProperties().get("spawn_centro", "default", String.class); // propiedad clave
 
-            ZonaTransicion zona = new ZonaTransicion(
+            zonasTransicion.add(new ZonaTransicion(
                 rect.x / TILE_SIZE,
                 rect.y / TILE_SIZE,
                 rect.width / TILE_SIZE,
                 rect.height / TILE_SIZE,
-                destino
-            );
-            zonasTransicion.add(zona);
+                destino,
+                spawnName
+            ));
+        }
+    }
+
+    public void generarEnemigos(int cantidad) {
+        enemigos = new ArrayList<>();
+        for (int i = 0; i < cantidad; i++) {
+            float x = MathUtils.random(2f, getAnchoMundo() - 2f);
+            float y = MathUtils.random(2f, getAltoMundo() - 2f);
+            enemigos.add(new Enemigo(x, y));
+        }
+    }
+
+    private void cargarSpawnPoints() {
+        spawnPoints = new Array<>();
+        if (mapa.getLayers().get("spawns") == null) return;
+
+        MapObjects objetos = mapa.getLayers().get("spawns").getObjects();
+        for (MapObject objeto : objetos) {
+            if (!(objeto instanceof PointMapObject)) continue;
+
+            PointMapObject pointObj = (PointMapObject) objeto;
+            Vector2 point = pointObj.getPoint();
+
+            float x = point.x / TILE_SIZE;
+            float y = point.y / TILE_SIZE;
+
+            String name = objeto.getProperties().get("name", "default", String.class);
+            String salaId = objeto.getProperties().get("sala_id", id, String.class);
+
+            spawnPoints.add(new SpawnPoint(x, y, name, salaId));
         }
     }
 
@@ -93,8 +128,12 @@ public class Sala {
     public OrthogonalTiledMapRenderer getRenderer() { return renderer; }
     public Array<Rectangle> getColisiones() { return colisiones; }
     public Array<ZonaTransicion> getZonasTransicion() { return zonasTransicion; }
+    public ArrayList<Enemigo> getEnemigos() { return enemigos; }
     public float getAnchoMundo() { return anchoTiles; }
     public float getAltoMundo() { return altoTiles; }
+    public Array<SpawnPoint> getSpawnPoints() {
+        return spawnPoints;
+    }
 
     public void dispose() {
         if (mapa != null) mapa.dispose();
