@@ -281,6 +281,15 @@ public class Jugador {
         Gdx.app.log("Jugador", "Hitbox de ataque activado en: " + hitboxAtaque.toString());
     }
 
+    public Rectangle getHitbox() {
+        return new Rectangle(
+            posicion.x + offsetHitboxX,
+            posicion.y + offsetHitboxY,
+            anchoHitbox,
+            altoHitbox
+        );
+    }
+
 
     public void atacar() {
         if (accionActual != Accion.ATAQUE && accionActual != Accion.MUERTE) {

@@ -1,23 +1,17 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
+import com.abyssdev.entertheabyss.mapas.Mapa;
+import com.abyssdev.entertheabyss.mapas.Sala;
+import com.abyssdev.entertheabyss.mapas.SpawnPoint;
+import com.abyssdev.entertheabyss.mapas.ZonaTransicion;
 import com.abyssdev.entertheabyss.logica.ManejoEntradas;
 import com.abyssdev.entertheabyss.personajes.Enemigo;
 import com.abyssdev.entertheabyss.personajes.Jugador;
-import com.abyssdev.entertheabyss.ui.Hud; // ✅ Import del HUD
+import com.abyssdev.entertheabyss.ui.Hud;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -31,21 +25,147 @@ public class PantallaJuego extends Pantalla {
     private OrthographicCamera camara;
     private Viewport viewport;
     private Jugador jugador;
-    private AssetManager assetManager;
-    private TiledMap mapa;
-    private int mapaAncho;
-    private int mapaAlto;
-    private OrthogonalTiledMapRenderer renderer;
+    private Mapa mapaActual;
+    private Sala salaActual;
+
     private ArrayList<Enemigo> enemigos;
-    private Array<Rectangle> rectangulosColision = new Array<>();
 
-    private final float TILE_SIZE = 16f;
+    // ✅ Fade entre salas
+    private boolean enTransicion = false;
+    private float fadeAlpha = 0f;
+    private float fadeSpeed = 2f; // Ajusta para hacerlo más rápido o lento
+    private String salaDestinoId = null;
 
-    // ✅ NUEVO: Instancia del HUD
+    // ✅ HUD
     private Hud hud;
+    private boolean yaInicializado = false;
 
     public PantallaJuego(EnterTheAbyssPrincipal juego) {
         super(juego);
+    }
+
+    @Override
+    public void show() {
+        if (!yaInicializado) {
+            jugador = new Jugador();
+
+            mapaActual = new Mapa("mazmorra1");
+            mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx"));
+            mapaActual.agregarSala(new Sala("sala3", "maps/mapa1_sala3.tmx"));
+
+            camara = new OrthographicCamera();
+            viewport = new FitViewport(32, 32 * (9f / 16f), camara);
+
+            cambiarSala("sala1");
+
+            hud = new Hud(jugador, viewport);
+
+            yaInicializado = true;
+        } else {
+            actualizarCamara();
+        }
+        Gdx.input.setInputProcessor(new ManejoEntradas(jugador));
+    }
+
+
+
+    private void cambiarSala(String destinoId) {
+        Sala salaDestino = mapaActual.getSala(destinoId);
+        if (salaDestino == null) {
+            Gdx.app.error("PantallaJuego", "Sala destino no encontrada: " + destinoId);
+            return;
+        }
+
+        Sala salaAnterior = salaActual;
+        salaActual = salaDestino;
+        mapaActual.establecerSalaActual(destinoId);
+
+        // Si venimos de una transición, buscar el spawn point
+        if (enTransicion && salaDestinoId != null) {
+            // Buscar la zona de transición que nos trajo aquí
+            for (ZonaTransicion zona : salaAnterior.getZonasTransicion()) {
+                if (zona.destinoSalaId.equals(destinoId)) {
+                    // Buscar en la sala destino un spawn con ese name y sala_id = destinoId
+                    SpawnPoint spawn = null;
+                    for (SpawnPoint sp : salaDestino.getSpawnPoints()) {
+                        if (sp.name.equals(zona.spawnName) && sp.salaId.equals(destinoId)) {
+                            spawn = sp;
+                            break;
+                        }
+                    }
+
+                    if (spawn != null) {
+                        jugador.setX(spawn.x);
+                        jugador.setY(spawn.y);
+                    } else {
+                        // Fallback: usar el primer spawn de la sala destino
+                        if (!salaDestino.getSpawnPoints().isEmpty()) {
+                            SpawnPoint fallback = salaDestino.getSpawnPoints().first();
+                            jugador.setX(fallback.x);
+                            jugador.setY(fallback.y);
+                        } else {
+                            // Último fallback: centrar
+                            centrarJugadorEnSala();
+                        }
+                    }
+                    break;
+                }
+            }
+        } else {
+            // Inicio del juego: centrar o usar spawn "default"
+            SpawnPoint defaultSpawn = null;
+            for (SpawnPoint sp : salaDestino.getSpawnPoints()) {
+                if (sp.name.equals("default") && sp.salaId.equals(destinoId)) {
+                    defaultSpawn = sp;
+                    break;
+                }
+            }
+            if (defaultSpawn != null) {
+                jugador.setX(defaultSpawn.x);
+                jugador.setY(defaultSpawn.y);
+            } else {
+                centrarJugadorEnSala();
+            }
+        }
+
+        // Actualizar cámara
+        camara.position.set(jugador.getX(), jugador.getY(), 0);
+        camara.update();
+        salaActual.getRenderer().setView(camara);
+
+        // Enemigos
+        if (salaActual.getEnemigos() == null || salaActual.getEnemigos().isEmpty()) {
+            salaActual.generarEnemigos(5);
+        }
+    }
+
+    private void centrarJugadorEnSala() {
+        float centroX = salaActual.getAnchoMundo() / 2f;
+        float centroY = salaActual.getAltoMundo() / 2f;
+        jugador.setX(centroX);
+        jugador.setY(centroY);
+    }
+
+
+    private void verificarTransiciones() {
+        if (enTransicion) return;
+
+        Rectangle hitboxJugador = jugador.getHitbox();
+
+        for (ZonaTransicion zona : salaActual.getZonasTransicion()) {
+            if (hitboxJugador.overlaps(zona)) {
+                String destinoId = zona.destinoSalaId;
+                Sala salaDestino = mapaActual.getSala(destinoId);
+
+                if (salaDestino != null) {
+
+                    enTransicion = true;
+                    salaDestinoId = destinoId;
+                    fadeAlpha = 0f;
+                    break;
+                }
+            }
+        }
     }
 
     @Override
@@ -53,119 +173,101 @@ public class PantallaJuego extends Pantalla {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        renderer.setView(camara);
-        renderer.render();
+        salaActual.getRenderer().setView(camara);
+        salaActual.getRenderer().render();
 
-        // COLISIONES
-        MapObjects objetos = mapa.getLayers().get("colisiones").getObjects();
-
-        for (MapObject objeto : objetos) {
-            if (!(objeto instanceof RectangleMapObject)) continue;
-
-            if (objeto.getProperties().containsKey("colision") && objeto.getProperties().get("colision", Boolean.class)) {
-                Rectangle rectOriginal = ((RectangleMapObject) objeto).getRectangle();
-                Rectangle rectEscalado = new Rectangle(
-                    rectOriginal.x / TILE_SIZE,
-                    rectOriginal.y / TILE_SIZE,
-                    rectOriginal.width / TILE_SIZE,
-                    rectOriginal.height / TILE_SIZE
-                );
-                rectangulosColision.add(rectEscalado);
-            }
-        }
-
-
+        // Actualizar enemigos
+        ArrayList<Enemigo> enemigos = salaActual.getEnemigos();
         for (int i = enemigos.size() - 1; i >= 0; i--) {
             Enemigo enemigo = enemigos.get(i);
-            if (enemigo.actualizar(delta, jugador.getPosicion(), rectangulosColision, enemigos)) {
-                if(jugador.getVida() <= jugador.getVidaMinima() ){
-                    juego.setScreen(new PantallaGameOver(juego));
-                }
+            if (enemigo.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos)) {
                 jugador.recibirDanio(10);
+                if (jugador.getVida() <= 0) {
+                    juego.setScreen(new PantallaGameOver(juego));
+                    return;
+                }
             }
-
             if (enemigo.debeEliminarse()) {
                 enemigos.remove(i);
             }
         }
 
-        jugador.update(delta, rectangulosColision); // Pasamos el ArrayList con los objetos que son colisionables
+        // Actualizar jugador
+        jugador.update(delta, salaActual.getColisiones());
 
-        jugador.update(delta, rectangulosColision);
+        // Verificar transiciones
+        verificarTransiciones();
+
+        // Manejar fade
+        if (enTransicion) {
+            if (fadeAlpha < 1f) {
+                fadeAlpha += fadeSpeed * delta;
+                if (fadeAlpha >= 1f) {
+                    fadeAlpha = 1f;
+                    cambiarSala(salaDestinoId);
+                }
+            } else {
+                fadeAlpha -= fadeSpeed * delta;
+                if (fadeAlpha <= 0f) {
+                    fadeAlpha = 0f;
+                    enTransicion = false;
+                    salaDestinoId = null;
+                }
+            }
+        }
 
         actualizarCamara();
 
         juego.batch.setProjectionMatrix(camara.combined);
         juego.batch.begin();
-        for (Enemigo enemigo : enemigos) {
+
+        // Dibujar enemigos
+        for (Enemigo enemigo : salaActual.getEnemigos()) {
             enemigo.renderizar(juego.batch);
         }
+
+        // Dibujar jugador
         jugador.dibujar(juego.batch);
+
         juego.batch.end();
 
-        // ✅ DIBUJAR EL HUD (siempre al final, encima de todo)
         if (hud != null) {
             hud.update();
             hud.draw(juego.batch);
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            juego.setScreen(new PantallaPausa(juego, this));
-        }
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-            juego.setScreen(new PantallaArbolHabilidades(juego, this, jugador));
+        // Inputs bloqueados durante transición
+        if (!enTransicion) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                juego.setScreen(new PantallaPausa(juego, this));
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+                juego.setScreen(new PantallaArbolHabilidades(juego, this, jugador));
+            }
         }
     }
 
-    @Override
-    public void show() {
-        renderer = new OrthogonalTiledMapRenderer(crearMapa("maps/sala1.tmx"), 1 / TILE_SIZE);
-        camara = new OrthographicCamera();
+    private void actualizarCamara() {
+        float halfWidth = camara.viewportWidth / 2f;
+        float halfHeight = camara.viewportHeight / 2f;
 
-        TiledMapTileLayer capa = (TiledMapTileLayer) mapa.getLayers().get(0);
-        mapaAncho = capa.getWidth();
-        mapaAlto = capa.getHeight();
-        enemigos = new ArrayList<>();
+        float x = jugador.getX();
+        float y = jugador.getY();
 
-        for (int i = 0; i < 10; i++) {
-            float x = MathUtils.random(1f, mapaAncho - 2f);
-            float y = MathUtils.random(1f, mapaAlto - 2f);
-            enemigos.add(new Enemigo(x, y));
-        }
 
-        float aspectRatio = 16f / 9f;
-        float viewportHeight = mapaAlto;
-        float viewportWidth = viewportHeight * aspectRatio;
+        float limiteIzquierdo = halfWidth;
+        float limiteDerecho = Math.max(limiteIzquierdo, salaActual.getAnchoMundo() - halfWidth);
 
-        if (viewportWidth > mapaAncho) {
-            viewportWidth = mapaAncho;
-            viewportHeight = viewportWidth / aspectRatio;
-        }
+        float limiteInferior = halfHeight;
+        float limiteSuperior = Math.max(limiteInferior, salaActual.getAltoMundo() - halfHeight);
 
-        viewport = new FitViewport(viewportWidth, viewportHeight, camara);
+        x = MathUtils.clamp(x, limiteIzquierdo, limiteDerecho);
+        y = MathUtils.clamp(y, limiteInferior, limiteSuperior);
 
-        if (jugador == null) {
-            float mapaCentroX = mapaAncho / 2f;
-            float mapaCentroY = mapaAlto / 2f;
-            jugador = new Jugador();
-            jugador.setX(mapaCentroX);
-            jugador.setY(mapaCentroY);
-        }
-
-        camara.position.set(jugador.getX(), jugador.getY(), 0);
+        camara.position.set(x, y, 0);
         camara.update();
-
-        Gdx.input.setInputProcessor(new ManejoEntradas(jugador));
-
-        // ✅ Inicializar el HUD con el viewport
-        hud = new Hud(jugador, viewport);
     }
 
-    @Override
-    public void hide() {
-        // No hacer nada aquí para no perder el estado del juego
-    }
 
     @Override
     public void resize(int width, int height) {
@@ -174,41 +276,21 @@ public class PantallaJuego extends Pantalla {
     }
 
     @Override
-    public void dispose() {
-        renderer.dispose();
-        mapa.dispose();
-        assetManager.dispose();
-        jugador.dispose();
+    public void hide() {
+        // No destruir nada aquí
+    }
 
-        // ✅ LIBERAR RECURSOS DEL HUD
+    @Override
+    public void dispose() {
+        if (mapaActual != null) {
+            mapaActual.dispose();
+        }
         if (hud != null) {
             hud.dispose();
         }
-    }
-
-    private TiledMap crearMapa(String rutaArchivo) {
-        assetManager = new AssetManager();
-        assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
-        assetManager.load(rutaArchivo, TiledMap.class);
-        assetManager.finishLoading();
-        mapa = assetManager.get(rutaArchivo);
-        return mapa;
-    }
-
-    private void actualizarCamara() {
-        float x = jugador.getX();
-        float y = jugador.getY();
-
-        float halfWidth = camara.viewportWidth / 2f;
-        float halfHeight = camara.viewportHeight / 2f;
-
-        x = Math.max(halfWidth, x);
-        x = Math.min(mapaAncho - halfWidth, x);
-
-        y = Math.max(halfHeight, y);
-        y = Math.min(mapaAlto - halfHeight, y);
-
-        camara.position.set(x, y, 0);
-        camara.update();
+        if (jugador != null) {
+            jugador.dispose();
+        }
+        // Enemigos no tienen dispose() por defecto, pero si usan texturas, deberías agregarlo
     }
 }
