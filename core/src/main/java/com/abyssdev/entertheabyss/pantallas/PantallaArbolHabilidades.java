@@ -117,9 +117,10 @@ public class PantallaArbolHabilidades extends Pantalla {
         font.draw(batch, layout, (viewport.getWorldWidth() - layout.width) / 2, viewport.getWorldHeight() - 40);
 
         // Nivel y puntos de habilidad del jugador (simulados)
+        // Mostrar monedas y nivel del jugador
         font.getData().setScale(1.2f);
         font.setColor(Color.YELLOW);
-        font.draw(batch, "Puntos de Habilidad: 100", 50, 30);
+        font.draw(batch, "Monedas: " + jugador.getMonedas(), 50, 30); // ✅ Monedas reales
         font.draw(batch, "Nivel: " + 5, 50, 50);
 
         batch.end();

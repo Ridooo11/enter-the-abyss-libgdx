@@ -28,12 +28,10 @@ public class PantallaJuego extends Pantalla {
     private Mapa mapaActual;
     private Sala salaActual;
 
-    private ArrayList<Enemigo> enemigos;
-
     // ✅ Fade entre salas
     private boolean enTransicion = false;
     private float fadeAlpha = 0f;
-    private float fadeSpeed = 2f; // Ajusta para hacerlo más rápido o lento
+    private float fadeSpeed = 2f;
     private String salaDestinoId = null;
 
     // ✅ HUD
@@ -67,8 +65,6 @@ public class PantallaJuego extends Pantalla {
         Gdx.input.setInputProcessor(new ManejoEntradas(jugador));
     }
 
-
-
     private void cambiarSala(String destinoId) {
         Sala salaDestino = mapaActual.getSala(destinoId);
         if (salaDestino == null) {
@@ -80,12 +76,9 @@ public class PantallaJuego extends Pantalla {
         salaActual = salaDestino;
         mapaActual.establecerSalaActual(destinoId);
 
-        // Si venimos de una transición, buscar el spawn point
         if (enTransicion && salaDestinoId != null) {
-            // Buscar la zona de transición que nos trajo aquí
             for (ZonaTransicion zona : salaAnterior.getZonasTransicion()) {
                 if (zona.destinoSalaId.equals(destinoId)) {
-                    // Buscar en la sala destino un spawn con ese name y sala_id = destinoId
                     SpawnPoint spawn = null;
                     for (SpawnPoint sp : salaDestino.getSpawnPoints()) {
                         if (sp.name.equals(zona.spawnName) && sp.salaId.equals(destinoId)) {
@@ -98,13 +91,11 @@ public class PantallaJuego extends Pantalla {
                         jugador.setX(spawn.x);
                         jugador.setY(spawn.y);
                     } else {
-                        // Fallback: usar el primer spawn de la sala destino
                         if (!salaDestino.getSpawnPoints().isEmpty()) {
                             SpawnPoint fallback = salaDestino.getSpawnPoints().first();
                             jugador.setX(fallback.x);
                             jugador.setY(fallback.y);
                         } else {
-                            // Último fallback: centrar
                             centrarJugadorEnSala();
                         }
                     }
@@ -112,7 +103,6 @@ public class PantallaJuego extends Pantalla {
                 }
             }
         } else {
-            // Inicio del juego: centrar o usar spawn "default"
             SpawnPoint defaultSpawn = null;
             for (SpawnPoint sp : salaDestino.getSpawnPoints()) {
                 if (sp.name.equals("default") && sp.salaId.equals(destinoId)) {
@@ -128,12 +118,10 @@ public class PantallaJuego extends Pantalla {
             }
         }
 
-        // Actualizar cámara
         camara.position.set(jugador.getX(), jugador.getY(), 0);
         camara.update();
         salaActual.getRenderer().setView(camara);
 
-        // Enemigos
         if (salaActual.getEnemigos() == null || salaActual.getEnemigos().isEmpty()) {
             salaActual.generarEnemigos(5);
         }
@@ -146,11 +134,15 @@ public class PantallaJuego extends Pantalla {
         jugador.setY(centroY);
     }
 
-
     private void verificarTransiciones() {
         if (enTransicion) return;
 
-        Rectangle hitboxJugador = jugador.getHitbox();
+        Rectangle hitboxJugador = new Rectangle(
+            jugador.getX() + jugador.getAncho() / 4f,
+            jugador.getY(),
+            jugador.getAncho() / 2f,
+            jugador.getAlto()
+        );
 
         for (ZonaTransicion zona : salaActual.getZonasTransicion()) {
             if (hitboxJugador.overlaps(zona)) {
@@ -158,7 +150,6 @@ public class PantallaJuego extends Pantalla {
                 Sala salaDestino = mapaActual.getSala(destinoId);
 
                 if (salaDestino != null) {
-
                     enTransicion = true;
                     salaDestinoId = destinoId;
                     fadeAlpha = 0f;
@@ -176,29 +167,42 @@ public class PantallaJuego extends Pantalla {
         salaActual.getRenderer().setView(camara);
         salaActual.getRenderer().render();
 
-        // Actualizar enemigos
         ArrayList<Enemigo> enemigos = salaActual.getEnemigos();
-        for (int i = enemigos.size() - 1; i >= 0; i--) {
-            Enemigo enemigo = enemigos.get(i);
-            if (enemigo.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos)) {
-                jugador.recibirDanio(10);
-                if (jugador.getVida() <= 0) {
-                    juego.setScreen(new PantallaGameOver(juego));
-                    return;
+        if (enemigos != null) {
+            // ✅ Primero: verificar si el enemigo ya debe eliminarse (por animación terminada)
+            for (int i = enemigos.size() - 1; i >= 0; i--) {
+                Enemigo enemigo = enemigos.get(i);
+                if (enemigo.debeEliminarse()) {
+                    jugador.modificarMonedas(10); // ✅ Sumar 10 monedas
+                    System.out.println("✅ Enemigo eliminado. Jugador recibe 10 monedas.");
+                    enemigos.remove(i);
+                    continue; // Saltar el resto del bucle
+                }
+
+                // ✅ Segundo: actualizar enemigo (puede atacar al jugador)
+                if (enemigo.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos)) {
+                    jugador.recibirDanio(10);
+                    if (jugador.getVida() <= 0) {
+                        juego.setScreen(new PantallaGameOver(juego));
+                        return;
+                    }
                 }
             }
-            if (enemigo.debeEliminarse()) {
-                enemigos.remove(i);
+
+            // ✅ Tercero: verificar ataque del jugador
+            if (jugador.getHitboxAtaque().getWidth() > 0) {
+                for (int i = enemigos.size() - 1; i >= 0; i--) {
+                    Enemigo enemigo = enemigos.get(i);
+                    if (!enemigo.debeEliminarse() && jugador.getHitboxAtaque().overlaps(enemigo.getRectangulo())) {
+                        enemigo.recibirGolpe();
+                    }
+                }
             }
         }
 
-        // Actualizar jugador
         jugador.update(delta, salaActual.getColisiones());
-
-        // Verificar transiciones
         verificarTransiciones();
 
-        // Manejar fade
         if (enTransicion) {
             if (fadeAlpha < 1f) {
                 fadeAlpha += fadeSpeed * delta;
@@ -220,15 +224,10 @@ public class PantallaJuego extends Pantalla {
 
         juego.batch.setProjectionMatrix(camara.combined);
         juego.batch.begin();
-
-        // Dibujar enemigos
         for (Enemigo enemigo : salaActual.getEnemigos()) {
             enemigo.renderizar(juego.batch);
         }
-
-        // Dibujar jugador
         jugador.dibujar(juego.batch);
-
         juego.batch.end();
 
         if (hud != null) {
@@ -236,7 +235,6 @@ public class PantallaJuego extends Pantalla {
             hud.draw(juego.batch);
         }
 
-        // Inputs bloqueados durante transición
         if (!enTransicion) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
                 juego.setScreen(new PantallaPausa(juego, this));
@@ -254,10 +252,8 @@ public class PantallaJuego extends Pantalla {
         float x = jugador.getX();
         float y = jugador.getY();
 
-
         float limiteIzquierdo = halfWidth;
         float limiteDerecho = Math.max(limiteIzquierdo, salaActual.getAnchoMundo() - halfWidth);
-
         float limiteInferior = halfHeight;
         float limiteSuperior = Math.max(limiteInferior, salaActual.getAltoMundo() - halfHeight);
 
@@ -268,7 +264,6 @@ public class PantallaJuego extends Pantalla {
         camara.update();
     }
 
-
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
@@ -277,7 +272,6 @@ public class PantallaJuego extends Pantalla {
 
     @Override
     public void hide() {
-        // No destruir nada aquí
     }
 
     @Override
@@ -291,6 +285,5 @@ public class PantallaJuego extends Pantalla {
         if (jugador != null) {
             jugador.dispose();
         }
-        // Enemigos no tienen dispose() por defecto, pero si usan texturas, deberías agregarlo
     }
 }
