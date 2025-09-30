@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 
 public class MenuInicio extends Pantalla {
 
@@ -35,18 +36,17 @@ public class MenuInicio extends Pantalla {
 
     @Override
     public void show() {
-        font = new BitmapFont(); // Fuente por defecto
-        font.getData().setScale(2.5f); // Aumentar tamaño de fuente
-
+        font = new BitmapFont();
+        font.getData().setScale(2.5f);
         camara = new OrthographicCamera();
-        viewport = new FitViewport(640, 480, camara); // Resolución lógica base
+        viewport = new FitViewport(640, 480, camara);
         viewport.apply();
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
-
-
         fondo = new Texture(Gdx.files.internal("Fondos/ImagenMenuInicio.PNG"));
         layout = new GlyphLayout();
+
+       Sonidos.reproducirMusicaMenu(); // ✅ Reproducir música de menú
     }
 
     @Override
@@ -96,6 +96,8 @@ public class MenuInicio extends Pantalla {
         }
 
         juego.batch.end();
+
+
     }
 
     @Override
@@ -116,6 +118,7 @@ public class MenuInicio extends Pantalla {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             if (opcionSeleccionada == 0) {
+                Sonidos.reproducirMusicaJuego(); // ✅ Reproducir música de juego ANTES de cambiar
                 juego.setScreen(new PantallaJuego(juego));
             } else if (opcionSeleccionada == 1) {
                 Gdx.app.exit();

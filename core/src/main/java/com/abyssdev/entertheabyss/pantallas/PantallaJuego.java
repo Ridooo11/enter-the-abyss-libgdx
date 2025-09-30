@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 
 import java.util.ArrayList;
 
@@ -46,23 +47,20 @@ public class PantallaJuego extends Pantalla {
     public void show() {
         if (!yaInicializado) {
             jugador = new Jugador();
-
             mapaActual = new Mapa("mazmorra1");
             mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx"));
             mapaActual.agregarSala(new Sala("sala3", "maps/mapa1_sala3.tmx"));
-
             camara = new OrthographicCamera();
             viewport = new FitViewport(32, 32 * (9f / 16f), camara);
-
             cambiarSala("sala1");
-
             hud = new Hud(jugador, viewport);
-
             yaInicializado = true;
         } else {
             actualizarCamara();
         }
         Gdx.input.setInputProcessor(new ManejoEntradas(jugador));
+
+        Sonidos.reproducirMusicaJuego(); // ✅ Reproducir música de juego
     }
 
     private void cambiarSala(String destinoId) {
@@ -169,20 +167,19 @@ public class PantallaJuego extends Pantalla {
 
         ArrayList<Enemigo> enemigos = salaActual.getEnemigos();
         if (enemigos != null) {
-            // ✅ Primero: verificar si el enemigo ya debe eliminarse (por animación terminada)
             for (int i = enemigos.size() - 1; i >= 0; i--) {
                 Enemigo enemigo = enemigos.get(i);
                 if (enemigo.debeEliminarse()) {
-                    jugador.modificarMonedas(10); // ✅ Sumar 10 monedas
+                    jugador.modificarMonedas(10);
                     System.out.println("✅ Enemigo eliminado. Jugador recibe 10 monedas.");
                     enemigos.remove(i);
-                    continue; // Saltar el resto del bucle
+                    continue;
                 }
 
-                // ✅ Segundo: actualizar enemigo (puede atacar al jugador)
                 if (enemigo.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos)) {
                     jugador.recibirDanio(10);
                     if (jugador.getVida() <= 0) {
+                        Sonidos.reproducirMusicaDerrota(); // ✅ Reproducir música de derrota
                         juego.setScreen(new PantallaGameOver(juego));
                         return;
                     }

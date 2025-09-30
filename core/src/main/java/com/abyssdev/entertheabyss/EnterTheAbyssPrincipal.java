@@ -25,8 +25,8 @@ public class EnterTheAbyssPrincipal extends Game {
     public void create() {
         batch = new SpriteBatch();
         texturaBlanca = generarTexturaBlanca();
-        setScreen(new MenuInicio(this));
         Sonidos.cargar();
+        setScreen(new MenuInicio(this));
     }
 
     public Texture generarTexturaBlanca() {
