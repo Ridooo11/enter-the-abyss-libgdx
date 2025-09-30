@@ -1,5 +1,6 @@
 package com.abyssdev.entertheabyss.personajes;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
@@ -16,11 +17,12 @@ public class Enemigo {
 
     private static final float VELOCIDAD = 3f;
     private static final float TAMANO = 3f;
-
     private static final float DISTANCIA_ATAQUE = 1.2f;
     private static final float COOLDOWN_ATAQUE = 1.0f;
 
     private float tiempoDesdeUltimoAtaque = 0;
+    private float tiempoDesdeUltimoGolpe = 0f;
+    private static final float COOLDOWN_GOLPE = 0.1f;
 
     private Texture hojaSprite;
     private Vector2 posicion;
@@ -37,6 +39,9 @@ public class Enemigo {
     private boolean eliminar;
     private boolean haciaIzquierda;
 
+    private int golpesRecibidos = 0;
+    private static final int GOLPES_PARA_MORIR = 3;
+
     public Enemigo(float x, float y) {
         hojaSprite = new Texture("personajes/esqueletoEnemigo.png");
         posicion = new Vector2(x, y);
@@ -45,13 +50,14 @@ public class Enemigo {
         tiempoEstado = 0;
         eliminar = false;
         haciaIzquierda = false;
-
+        golpesRecibidos = 0;
+        tiempoDesdeUltimoGolpe = 0;
+        tiempoDesdeUltimoAtaque = 0;
         cargarAnimaciones();
     }
 
     private void cargarAnimaciones() {
         TextureRegion[][] regiones = TextureRegion.split(hojaSprite, 64, 64);
-
         animAtacar = crearAnimacion(regiones[0], 13, 0.07f, Animation.PlayMode.LOOP);
         animMuerte = crearAnimacion(regiones[1], 13, 0.1f, Animation.PlayMode.NORMAL);
         animCaminar = crearAnimacion(regiones[2], 12, 0.1f, Animation.PlayMode.LOOP);
@@ -70,6 +76,7 @@ public class Enemigo {
     public boolean actualizar(float delta, Vector2 posicionJugador, Array<Rectangle> colisionesMapa, ArrayList<Enemigo> otrosEnemigos) {
         tiempoEstado += delta;
         tiempoDesdeUltimoAtaque += delta;
+        tiempoDesdeUltimoGolpe += delta;
 
         if (estado == Estado.MUERTO && animMuerte.isAnimationFinished(tiempoEstado)) {
             eliminar = true;
@@ -84,35 +91,30 @@ public class Enemigo {
             Vector2 direccion = new Vector2(posicionJugador).sub(posicion);
             float distancia = direccion.len();
 
-            // Si está en rango de ataque
             if (distancia < DISTANCIA_ATAQUE) {
                 velocidad.setZero();
                 if (tiempoDesdeUltimoAtaque >= COOLDOWN_ATAQUE) {
                     cambiarEstado(Estado.ATAQUE);
                     tiempoDesdeUltimoAtaque = 0;
-                    System.out.println("¡Jugador ha sido atacado!");
+                    Gdx.app.log("Enemigo", "¡Jugador ha sido atacado!");
                     return true;
                 }
             } else {
-                // Seguir caminando
                 cambiarEstado(Estado.CAMINAR);
                 direccion.nor();
                 velocidad.set(direccion.scl(VELOCIDAD));
-
                 haciaIzquierda = velocidad.x < 0;
 
                 Vector2 nuevaPos = new Vector2(posicion).add(velocidad.x * delta, velocidad.y * delta);
                 Rectangle rectNuevo = new Rectangle(nuevaPos.x, nuevaPos.y, TAMANO, TAMANO);
 
                 boolean colisiona = false;
-
                 for (Rectangle r : colisionesMapa) {
                     if (rectNuevo.overlaps(r)) {
                         colisiona = true;
                         break;
                     }
                 }
-
                 if (!colisiona) {
                     for (Enemigo otro : otrosEnemigos) {
                         if (otro != this && rectNuevo.overlaps(otro.getRectangulo())) {
@@ -121,7 +123,6 @@ public class Enemigo {
                         }
                     }
                 }
-
                 if (!colisiona) {
                     cambiarEstado(Estado.CAMINAR);
                     posicion.set(nuevaPos);
@@ -167,7 +168,17 @@ public class Enemigo {
     }
 
     public void recibirGolpe() {
+        if (tiempoDesdeUltimoGolpe < COOLDOWN_GOLPE) return;
+
+        golpesRecibidos++;
         cambiarEstado(Estado.HIT);
+        System.out.println("🔥 Enemigo recibió golpe " + golpesRecibidos + "/" + GOLPES_PARA_MORIR); // ✅ Verificar golpes
+
+        if (golpesRecibidos >= GOLPES_PARA_MORIR) {
+            morir();
+        }
+
+        tiempoDesdeUltimoGolpe = 0f;
     }
 
     public void morir() {

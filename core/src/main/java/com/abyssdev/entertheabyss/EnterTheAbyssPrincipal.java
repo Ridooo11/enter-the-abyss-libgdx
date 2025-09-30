@@ -3,6 +3,7 @@ package com.abyssdev.entertheabyss;
 import com.abyssdev.entertheabyss.pantallas.MenuInicio;
 import com.abyssdev.entertheabyss.pantallas.PantallaGameOver;
 import com.abyssdev.entertheabyss.personajes.Jugador;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class EnterTheAbyssPrincipal extends Game {
@@ -24,6 +26,7 @@ public class EnterTheAbyssPrincipal extends Game {
         batch = new SpriteBatch();
         texturaBlanca = generarTexturaBlanca();
         setScreen(new MenuInicio(this));
+        Sonidos.cargar();
     }
 
     public Texture generarTexturaBlanca() {
@@ -39,5 +42,6 @@ public class EnterTheAbyssPrincipal extends Game {
     public void dispose() {
         batch.dispose();
         texturaBlanca.dispose();
+        Sonidos.dispose();
     }
 }

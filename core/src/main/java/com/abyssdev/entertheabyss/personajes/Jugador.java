@@ -1,14 +1,15 @@
 package com.abyssdev.entertheabyss.personajes;
 
+import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Rectangle; // Importar Rectangle para el hitbox
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 
 public class Jugador {
     private Vector2 posicion;
@@ -17,7 +18,6 @@ public class Jugador {
 
     private int vida = 100;
     private int vidaMaxima = 100;
-    private int vidaMinima = 0;
     private int municionActual = 30;
     private int municionMaxima = 30;
     private int monedas = 0;
@@ -27,6 +27,7 @@ public class Jugador {
     private final float altoHitbox = 1f;
     private final float offsetHitboxX = 1f;
     private final float offsetHitboxY = .5f;
+
     // MOVIMIENTO
     private boolean arriba, abajo, izquierda, derecha;
     private Texture hojaSprite;
@@ -51,38 +52,25 @@ public class Jugador {
         hojaSprite = new Texture("personajes/player.png");
         inicializarMapaFilas();
         cargarAnimaciones();
-
         hitboxAtaque = new Rectangle(0, 0, 0, 0);
     }
 
     private void inicializarMapaFilas() {
         mapaFilasAnimacion = new int[Accion.values().length][Direccion.values().length];
-
-
-        // ESTATICO
-        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.ABAJO.ordinal()] = 0;   // Estático de frente
-        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.DERECHA.ordinal()] = 1; // Estático hacia la derecha
-        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.ARRIBA.ordinal()] = 2;   // Estático hacia arriba
-        // IDLE hacia la izquierda usa la animación de IDLE hacia la derecha (fila 1)
+        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.ABAJO.ordinal()] = 0;
+        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.DERECHA.ordinal()] = 1;
+        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.ARRIBA.ordinal()] = 2;
         mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.IZQUIERDA.ordinal()] = 1;
-
-        // CAMINAR
-        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.ABAJO.ordinal()] = 3;   // Caminar hacia abajo
-        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.DERECHA.ordinal()] = 4; // Caminar hacia la derecha
-        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.ARRIBA.ordinal()] = 5;   // Caminar hacia arriba
-        // Caminar hacia la izquierda usa la animación de caminar hacia la derecha (fila 4)
+        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.ABAJO.ordinal()] = 3;
+        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.DERECHA.ordinal()] = 4;
+        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.ARRIBA.ordinal()] = 5;
         mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.IZQUIERDA.ordinal()] = 4;
-
-        // ATAQUE
-        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.ABAJO.ordinal()] = 6;   // Atacar hacia abajo
-        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.DERECHA.ordinal()] = 7; // Atacar hacia la derecha
-        // Atacar hacia la izquierda usa la animación de atacar hacia la DERECHA (fila 7)
+        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.ABAJO.ordinal()] = 6;
+        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.DERECHA.ordinal()] = 7;
         mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.IZQUIERDA.ordinal()] = 7;
-        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.ARRIBA.ordinal()] = 8;   // Atacar hacia arriba
-
-        // MUERTE
+        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.ARRIBA.ordinal()] = 8;
         for (int dir = 0; dir < Direccion.values().length; dir++) {
-            mapaFilasAnimacion[Accion.MUERTE.ordinal()][dir] = 9; // Fila 9 para efecto de muerte
+            mapaFilasAnimacion[Accion.MUERTE.ordinal()][dir] = 9;
         }
     }
 
@@ -93,7 +81,6 @@ public class Jugador {
         for (Accion accion : Accion.values()) {
             for (Direccion dir : Direccion.values()) {
                 int filaSpriteSheet = mapaFilasAnimacion[accion.ordinal()][dir.ordinal()];
-
                 if (filaSpriteSheet >= regiones.length) {
                     Gdx.app.error("Jugador", "Error: La fila " + filaSpriteSheet +
                         " para la acción " + accion.name() +
@@ -152,13 +139,11 @@ public class Jugador {
             dy *= 0.7071f;
         }
 
-
         float nuevaX = posicion.x + dx * velocidad * delta;
         float nuevaY = posicion.y + dy * velocidad * delta;
 
         Rectangle hitboxX = new Rectangle(nuevaX + offsetHitboxX, posicion.y + offsetHitboxY, anchoHitbox, altoHitbox);
         Rectangle hitboxY = new Rectangle(posicion.x + offsetHitboxX, nuevaY + offsetHitboxY, anchoHitbox, altoHitbox);
-
 
         boolean colisionX = false;
         for (Rectangle r : colisiones) {
@@ -187,8 +172,7 @@ public class Jugador {
         if (accionActual != Accion.MUERTE) {
             if (accionActual == Accion.ATAQUE) {
                 estadoTiempo += delta;
-                // --- Lógica del Hitbox de Ataque ---
-                if (!atacandoAplicado && estadoTiempo >= 0.05f) { // Activa el hitbox después de 0.05 segundos
+                if (!atacandoAplicado && estadoTiempo >= 0.05f) {
                     actualizarHitboxAtaque();
                     atacandoAplicado = true;
                     tiempoHitboxActivo = 0;
@@ -196,7 +180,7 @@ public class Jugador {
                 if (atacandoAplicado) {
                     tiempoHitboxActivo += delta;
                     if (tiempoHitboxActivo >= duracionHitboxAtaque) {
-                        hitboxAtaque.setSize(0, 0); // Desactiva el hitbox
+                        hitboxAtaque.setSize(0, 0);
                     }
                 }
 
@@ -231,65 +215,50 @@ public class Jugador {
         Animation<TextureRegion> currentAnimation = animaciones[accionActual.ordinal()][direccionActual.ordinal()];
         TextureRegion frameADibujar = currentAnimation.getKeyFrame(estadoTiempo);
 
-        // --- Lógica de Volteo de Sprites ---
         boolean voltearX = false;
         if (direccionActual == Direccion.IZQUIERDA) {
-            // Voltear si la acción es ESTATICO, CAMINAR, o ATAQUE,
-            // ya que sus animaciones de IZQUIERDA reutilizan las de DERECHA.
             if (accionActual == Accion.ESTATICO || accionActual == Accion.CAMINAR || accionActual == Accion.ATAQUE) {
                 voltearX = true;
             }
         }
 
-        // Aplicar o revertir el volteo del frame
-        TextureRegion frameParaDibujar = new TextureRegion(frameADibujar); // Crea una COPIA
-
+        TextureRegion frameParaDibujar = new TextureRegion(frameADibujar);
         if (frameParaDibujar.isFlipX() && !voltearX) {
-            frameParaDibujar.flip(true, false); // Desvoltear si estaba volteado y no debería estarlo
+            frameParaDibujar.flip(true, false);
         } else if (!frameParaDibujar.isFlipX() && voltearX) {
-            frameParaDibujar.flip(true, false); // Voltear si no estaba volteado y debería estarlo
+            frameParaDibujar.flip(true, false);
         }
 
         batch.draw(frameParaDibujar, posicion.x, posicion.y, ancho, alto);
     }
 
     private void actualizarHitboxAtaque() {
-        float hitboxWidth = 30f;
-        float hitboxHeight = 30f;
+        float hitboxWidth = 0.5f;
+        float hitboxHeight = 0.5f;
         float offsetX = 0;
         float offsetY = 0;
 
         switch (direccionActual) {
             case ABAJO:
                 offsetX = (ancho - hitboxWidth) / 2;
-                offsetY = -hitboxHeight;
+                offsetY = -0.5f; // ✅ Justo debajo del jugador (punta de la espada)
                 break;
             case ARRIBA:
                 offsetX = (ancho - hitboxWidth) / 2;
-                offsetY = alto;
+                offsetY = alto; // ✅ Justo encima del jugador
                 break;
             case IZQUIERDA:
-                offsetX = -hitboxWidth;
+                offsetX = -0.5f; // ✅ Justo a la izquierda (punta de la espada)
                 offsetY = (alto - hitboxHeight) / 2;
                 break;
             case DERECHA:
-                offsetX = ancho;
+                offsetX = ancho; // ✅ Justo a la derecha (punta de la espada)
                 offsetY = (alto - hitboxHeight) / 2;
                 break;
         }
         hitboxAtaque.set(posicion.x + offsetX, posicion.y + offsetY, hitboxWidth, hitboxHeight);
-        Gdx.app.log("Jugador", "Hitbox de ataque activado en: " + hitboxAtaque.toString());
+        System.out.println("[Jugador] Hitbox de ataque: " + hitboxAtaque.toString()); // ✅ Verificar posición
     }
-
-    public Rectangle getHitbox() {
-        return new Rectangle(
-            posicion.x + offsetHitboxX,
-            posicion.y + offsetHitboxY,
-            anchoHitbox,
-            altoHitbox
-        );
-    }
-
 
     public void atacar() {
         if (accionActual != Accion.ATAQUE && accionActual != Accion.MUERTE) {
@@ -297,6 +266,7 @@ public class Jugador {
             estadoTiempo = 0;
             atacandoAplicado = false;
             tiempoHitboxActivo = 0;
+            Sonidos.reproducirAtaque();
         }
     }
 
@@ -308,33 +278,23 @@ public class Jugador {
             hitboxAtaque.setSize(0,0);
         }
     }
-    // --- GETTERS PARA EL HUD ---
 
-    public int getVida() {
-        return this.vida;
-    }
+    // --- GETTERS ---
+    public int getVida() { return this.vida; }
+    public int getVidaMaxima() { return this.vidaMaxima; }
+    public int getMunicionActual() { return this.municionActual; }
+    public int getMunicionMaxima() { return this.municionMaxima; }
+    public int getMonedas() { return this.monedas; }
+    public float getX() { return posicion.x; }
+    public float getY() { return posicion.y; }
+    public Vector2 getPosicion() { return posicion; }
+    public float getAncho() { return this.ancho; }
+    public float getAlto() { return this.alto; }
+    public Rectangle getHitboxAtaque() { return hitboxAtaque; }
 
-    public int getVidaMaxima() {
-        return this.vidaMaxima;
-    }
-    public int getVidaMinima(){ return this.vidaMinima;}
-
-    public int getMunicionActual() {
-        return this.municionActual;
-    }
-
-    public int getMunicionMaxima() {
-        return this.municionMaxima;
-    }
-
-    public int getMonedas() {
-        return this.monedas;
-    }
-
-    // --- SETTERS (opcionales, útiles para pickups o daño) ---
-
+    // --- SETTERS ---
     public void setVida(int vida) {
-        this.vida = Math.max(0, Math.min(vida, vidaMaxima)); // No permitir vida < 0 o > max
+        this.vida = Math.max(0, Math.min(vida, vidaMaxima));
     }
 
     public void modificarVida(int cantidad) {
@@ -363,13 +323,6 @@ public class Jugador {
         }
     }
 
-    public float getX() { return posicion.x; }
-    public float getY() { return posicion.y; }
-    public Vector2 getPosicion() { return posicion; }
-    public float getAncho() { return this.ancho; }
-    public float getAlto() { return this.alto; }
-    public Rectangle getHitboxAtaque() { return hitboxAtaque; }
-
     public void setX(float x) { this.posicion.x = x; }
     public void setY(float y) { this.posicion.y = y; }
     public void setPosicion(float x, float y) { this.posicion.set(x, y); }
@@ -380,8 +333,7 @@ public class Jugador {
     public void moverDerecha(boolean activo) { this.derecha = activo; }
 
     public void recibirDanio(int i) {
-        this.vida -=i;
-        System.out.println(this.vida);
+        this.vida -= i;
+        Gdx.app.log("Jugador", "Vida actual: " + this.vida);
     }
-
 }

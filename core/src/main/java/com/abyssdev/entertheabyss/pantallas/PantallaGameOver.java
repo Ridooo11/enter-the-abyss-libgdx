@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 
 public class PantallaGameOver extends Pantalla {
 
@@ -41,13 +42,16 @@ public class PantallaGameOver extends Pantalla {
         font.getData().setScale(2.2f);
 
         camara = new OrthographicCamera();
-        viewport = new FitViewport(800, 600, camara); // Resolución lógica base
+        viewport = new FitViewport(800, 600, camara);
         viewport.apply();
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
 
         fondoPausa = new Texture("Fondos/gameover.png");
         layout = new GlyphLayout();
+
+        // ✅ Reproducir música de derrota
+        Sonidos.reproducirMusicaDerrota();
     }
 
     @Override
@@ -128,5 +132,7 @@ public class PantallaGameOver extends Pantalla {
     public void dispose() {
         font.dispose();
         fondoPausa.dispose();
+
+
     }
 }
