@@ -50,7 +50,6 @@ public class PantallaJuego extends Pantalla {
             mapaActual = new Mapa("mazmorra1");
             mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx"));
             mapaActual.agregarSala(new Sala("sala2", "maps/mapa1_sala2.tmx"));
-            mapaActual.agregarSala(new Sala("sala3", "maps/mapa1_sala3.tmx"));
             camara = new OrthographicCamera();
             viewport = new FitViewport(32, 32 * (9f / 16f), camara);
             cambiarSala("sala1");
