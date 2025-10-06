@@ -28,14 +28,17 @@ public class PantallaJuego extends Pantalla {
     private Jugador jugador;
     private Mapa mapaActual;
     private Sala salaActual;
+    private ManejoEntradas inputProcessor;
 
-    // ✅ Fade entre salas
+    // Transicion
     private boolean enTransicion = false;
+    private boolean faseSubida = true;
     private float fadeAlpha = 0f;
     private float fadeSpeed = 2f;
     private String salaDestinoId = null;
+    private Texture texturaFade;
 
-    // ✅ HUD
+    // HUD
     private Hud hud;
     private boolean yaInicializado = false;
 
@@ -52,15 +55,16 @@ public class PantallaJuego extends Pantalla {
             mapaActual.agregarSala(new Sala("sala2", "maps/mapa1_sala2.tmx"));
             camara = new OrthographicCamera();
             viewport = new FitViewport(32, 32 * (9f / 16f), camara);
+            texturaFade = generarTextura();
             cambiarSala("sala1");
             hud = new Hud(jugador, viewport);
+            inputProcessor = new ManejoEntradas(jugador);
             yaInicializado = true;
         } else {
             actualizarCamara();
         }
-        Gdx.input.setInputProcessor(new ManejoEntradas(jugador));
-
-        Sonidos.reproducirMusicaJuego(); // ✅ Reproducir música de juego
+        Gdx.input.setInputProcessor(inputProcessor);
+        Sonidos.reproducirMusicaJuego();
     }
 
     private void cambiarSala(String destinoId) {
@@ -149,6 +153,7 @@ public class PantallaJuego extends Pantalla {
 
                 if (salaDestino != null) {
                     enTransicion = true;
+                    faseSubida = true;
                     salaDestinoId = destinoId;
                     fadeAlpha = 0f;
                     break;
@@ -201,11 +206,12 @@ public class PantallaJuego extends Pantalla {
         verificarTransiciones();
 
         if (enTransicion) {
-            if (fadeAlpha < 1f) {
+            if (faseSubida) {
                 fadeAlpha += fadeSpeed * delta;
                 if (fadeAlpha >= 1f) {
                     fadeAlpha = 1f;
                     cambiarSala(salaDestinoId);
+                    faseSubida = false;
                 }
             } else {
                 fadeAlpha -= fadeSpeed * delta;
@@ -230,6 +236,20 @@ public class PantallaJuego extends Pantalla {
         if (hud != null) {
             hud.update();
             hud.draw(juego.batch);
+        }
+
+        // Efecto FADE
+        if (fadeAlpha > 0f) {
+            juego.batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            juego.batch.begin();
+
+            juego.batch.setColor(0, 0, 0, fadeAlpha);
+            juego.batch.draw(texturaFade, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+
+            juego.batch.setColor(1, 1, 1, 1);
+
+            juego.batch.end();
         }
 
         if (!enTransicion) {
@@ -261,6 +281,15 @@ public class PantallaJuego extends Pantalla {
         camara.update();
     }
 
+    public Texture generarTextura() {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.BLACK);
+        pixmap.fill();
+        Texture textura = new Texture(pixmap);
+        pixmap.dispose();
+        return textura;
+    }
+
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
@@ -281,6 +310,10 @@ public class PantallaJuego extends Pantalla {
         }
         if (jugador != null) {
             jugador.dispose();
+        }
+
+        if (texturaFade != null) {
+            texturaFade.dispose();
         }
     }
 }

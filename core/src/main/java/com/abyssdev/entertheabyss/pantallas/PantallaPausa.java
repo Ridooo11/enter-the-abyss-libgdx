@@ -3,14 +3,12 @@ package com.abyssdev.entertheabyss.pantallas;
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -20,14 +18,13 @@ public class PantallaPausa extends Pantalla {
     private BitmapFont font;
     private Texture fondoPausa;
 
-    private final String[] opciones = {"Continuar", "Guardar", "Salir"};
+    private final String[] opciones = {"Continuar", "Opciones", "Salir"};
     private int opcionSeleccionada = 0;
 
     private float tiempoParpadeo = 0;
     private boolean mostrarColor = true;
 
     private GlyphLayout layout;
-
     private Viewport viewport;
     private OrthographicCamera camara;
 
@@ -42,7 +39,7 @@ public class PantallaPausa extends Pantalla {
         font.getData().setScale(2.2f);
 
         camara = new OrthographicCamera();
-        viewport = new FitViewport(800, 600, camara); // Resolución lógica base
+        viewport = new FitViewport(800, 600, camara);
         viewport.apply();
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
@@ -73,15 +70,14 @@ public class PantallaPausa extends Pantalla {
         juego.batch.begin();
         juego.batch.draw(fondoPausa, 0, 0, ancho, alto);
 
-        // ✅ Coordenadas fijas del marco (800x600)
-        float centerX = 400f; // 800 / 2
-        float centerY = 300f; // 600 / 2 - 80 (espacio arriba)
+        float centerX = 400f;
+        float centerY = 300f;
 
         for (int i = 0; i < opciones.length; i++) {
             String texto = opciones[i];
             layout.setText(font, texto);
             float x = centerX - layout.width / 2f;
-            float y = centerY + (opciones.length - 1 - i) * 60 - 20; // Ajuste manual
+            float y = centerY + (opciones.length - 1 - i) * 60 - 20;
 
             if (i == opcionSeleccionada && mostrarColor) {
                 font.setColor(Color.YELLOW);
@@ -117,9 +113,9 @@ public class PantallaPausa extends Pantalla {
                     juego.setScreen(pantallaJuego);
                     break;
                 case 1:
-                    System.out.println("Función guardar aún no implementada.");
+                    juego.setScreen(new PantallaOpciones(juego, this));
                     break;
-                case 2: // Salir
+                case 2:
                     Gdx.app.exit();
                     break;
             }

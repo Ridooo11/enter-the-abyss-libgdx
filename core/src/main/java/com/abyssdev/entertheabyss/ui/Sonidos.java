@@ -33,33 +33,77 @@ public class Sonidos {
         sonidoAtaque = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/espada.mp3"));
     }
 
-    // ✅ Métodos de música
-    public static void reproducirMusicaMenu() {
-        pararTodaMusica();
-        musicaMenu.play();
-    }
-
-    public static void reproducirMusicaJuego() {
-        pararTodaMusica();
-        musicaJuego.play();
-    }
-
-    public static void reproducirMusicaDerrota() { // ✅ Nuevo
-        pararTodaMusica();
-        musicaDerrota.play();
-    }
-
-    public static void pararTodaMusica() {
-        musicaMenu.stop();
-        musicaJuego.stop();
-        musicaDerrota.stop();
-    }
-
     // ✅ Efectos
     public static void reproducirAtaque() {
         if (sonidoAtaque != null) {
             sonidoAtaque.play(0.8f);
         }
+    }
+
+    private static float volumenMusica = 0.5f;
+    private static float volumenEfectos = 0.7f;
+
+    // ✅ AGREGAR ESTOS MÉTODOS
+    public static void setVolumenMusica(float volumen) {
+        volumenMusica = Math.max(0f, Math.min(1f, volumen));
+        if (musicaMenu != null) musicaMenu.setVolume(volumenMusica);
+        if (musicaJuego != null) musicaJuego.setVolume(volumenMusica);
+        if (musicaDerrota != null) musicaDerrota.setVolume(volumenMusica);
+    }
+
+    public static void setVolumenEfectos(float volumen) {
+        volumenEfectos = Math.max(0f, Math.min(1f, volumen));
+    }
+
+    public static float getVolumenMusica() {
+        return volumenMusica;
+    }
+
+    public static float getVolumenEfectos() {
+        return volumenEfectos;
+    }
+
+    // ✅ MODIFICAR tus métodos existentes para usar el volumen
+    public static void reproducirMusicaMenu() {
+        detenerTodaMusica();
+        if (musicaMenu == null) {
+            musicaMenu = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica_menu.mp3"));
+        }
+        musicaMenu.setLooping(true);
+        musicaMenu.setVolume(volumenMusica); // ⬅️ AGREGAR ESTA LÍNEA
+        musicaMenu.play();
+    }
+
+    public static void reproducirMusicaJuego() {
+        detenerTodaMusica();
+        if (musicaJuego == null) {
+            musicaJuego = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica_juego.mp3"));
+        }
+        musicaJuego.setLooping(true);
+        musicaJuego.setVolume(volumenMusica); // ⬅️ AGREGAR ESTA LÍNEA
+        musicaJuego.play();
+    }
+
+    public static void reproducirMusicaDerrota() {
+        detenerTodaMusica();
+        if (musicaDerrota == null) {
+            musicaDerrota = Gdx.audio.newMusic(Gdx.files.internal("sonidos/musica_derrota.mp3"));
+        }
+        musicaDerrota.setLooping(false);
+        musicaDerrota.setVolume(volumenMusica); // ⬅️ AGREGAR ESTA LÍNEA
+        musicaDerrota.play();
+    }
+
+    // ✅ Para efectos de sonido (ejemplo)
+    public static void reproducirEfectoGolpe() {
+        Sound efecto = Gdx.audio.newSound(Gdx.files.internal("sonidos/golpe.wav"));
+        efecto.play(volumenEfectos); // ⬅️ Usar volumenEfectos
+    }
+
+    public static void detenerTodaMusica() {
+        musicaMenu.stop();
+        musicaJuego.stop();
+        musicaDerrota.stop();
     }
 
     public static void dispose() {

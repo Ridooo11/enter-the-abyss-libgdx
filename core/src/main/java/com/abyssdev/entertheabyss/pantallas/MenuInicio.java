@@ -1,30 +1,29 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
+import com.abyssdev.entertheabyss.ui.FontManager;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.abyssdev.entertheabyss.ui.Sonidos;
 
 public class MenuInicio extends Pantalla {
 
-    private BitmapFont font;
+    private BitmapFont fontOpciones;
     private Texture fondo;
 
-    private final String[] opciones = {"Comenzar", "Salir"}; // "Comenzar" primero
+    private final String[] opciones = {"Comenzar", "Opciones", "Salir"};
     private int opcionSeleccionada = 0;
+
     private float tiempoParpadeo = 0;
-    private boolean mostrarRojo = true;
+    private float alphaParpadeo = 1f;
+    private float tiempoTotal = 0;
 
     private GlyphLayout layout;
     private Viewport viewport;
@@ -36,17 +35,19 @@ public class MenuInicio extends Pantalla {
 
     @Override
     public void show() {
-        font = new BitmapFont();
-        font.getData().setScale(2.5f);
+        fontOpciones = FontManager.getInstance().getGrande();
+
         camara = new OrthographicCamera();
         viewport = new FitViewport(640, 480, camara);
         viewport.apply();
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
-        fondo = new Texture(Gdx.files.internal("Fondos/ImagenMenuInicio.PNG"));
-        layout = new GlyphLayout();
 
-       Sonidos.reproducirMusicaMenu(); // ✅ Reproducir música de menú
+        fondo = new Texture(Gdx.files.internal("Fondos/ImagenMenuInicio.PNG"));
+        fondo.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        layout = new GlyphLayout();
+        Sonidos.reproducirMusicaMenu();
     }
 
     @Override
@@ -54,50 +55,67 @@ public class MenuInicio extends Pantalla {
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        tiempoParpadeo += delta;
-        if (tiempoParpadeo > 0.5f) {
-            mostrarRojo = !mostrarRojo;
-            tiempoParpadeo = 0;
-        }
-
+        tiempoTotal += delta;
+        actualizarAnimaciones(delta);
         manejarInput();
 
         camara.update();
         juego.batch.setProjectionMatrix(camara.combined);
 
-
         float ancho = viewport.getWorldWidth();
         float alto = viewport.getWorldHeight();
+        float centerX = ancho / 2f;
+        float centerY = alto / 2f;
 
         juego.batch.begin();
-        juego.batch.draw(fondo, 0, 0, ancho, alto);
+        dibujarFondoCubriendo(fondo, ancho, alto);
 
-
-        float centerX = viewport.getWorldWidth() / 2f;
-        float centerY = viewport.getWorldHeight() / 2f - 100;
-
+        float startY = centerY - 80;
         for (int i = 0; i < opciones.length; i++) {
             String texto = opciones[i];
+            layout.setText(fontOpciones, texto);
 
-            layout.setText(font, texto);
-            float textoAncho = layout.width;
-            float textoAlto = layout.height;
+            float x = centerX - layout.width / 2f;
+            float y = startY - (i * 70);
 
-            float x = centerX - textoAncho / 2f;
-            float y = centerY + (opciones.length - 1 - i) * 60; // separadas 60 px verticalmente, empezando arriba
-
-            if (i == opcionSeleccionada && mostrarRojo) {
-                font.setColor(Color.RED);
+            if (i == opcionSeleccionada) {
+                fontOpciones.setColor(1, 0, 0, alphaParpadeo);
+                layout.setText(fontOpciones, "►");
+                fontOpciones.draw(juego.batch, "►", x - 50, y);
+                fontOpciones.draw(juego.batch, "◄", x + layout.width + 30, y);
             } else {
-                font.setColor(Color.WHITE);
+                fontOpciones.setColor(1, 1, 1, 0.6f);
             }
 
-            font.draw(juego.batch, texto, x, y);
+            fontOpciones.draw(juego.batch, texto, centerX - layout.width / 2f, y);
         }
 
         juego.batch.end();
+    }
 
+    private void actualizarAnimaciones(float delta) {
+        tiempoParpadeo += delta;
+        alphaParpadeo = 0.7f + 0.3f * (float) Math.sin(tiempoParpadeo * 4);
+    }
 
+    private void dibujarFondoCubriendo(Texture textura, float anchoViewport, float altoViewport) {
+        float texturaAspect = (float) textura.getWidth() / textura.getHeight();
+        float viewportAspect = anchoViewport / altoViewport;
+
+        float drawWidth, drawHeight;
+        float offsetX = 0, offsetY = 0;
+
+        if (texturaAspect > viewportAspect) {
+            drawHeight = altoViewport;
+            drawWidth = drawHeight * texturaAspect;
+            offsetX = (anchoViewport - drawWidth) / 2f;
+        } else {
+            drawWidth = anchoViewport;
+            drawHeight = drawWidth / texturaAspect;
+            offsetY = (altoViewport - drawHeight) / 2f;
+        }
+
+        juego.batch.draw(textura, offsetX, offsetY, drawWidth, drawHeight);
     }
 
     @Override
@@ -117,18 +135,23 @@ public class MenuInicio extends Pantalla {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            if (opcionSeleccionada == 0) {
-                Sonidos.reproducirMusicaJuego(); // ✅ Reproducir música de juego ANTES de cambiar
-                juego.setScreen(new PantallaJuego(juego));
-            } else if (opcionSeleccionada == 1) {
-                Gdx.app.exit();
+            switch (opcionSeleccionada) {
+                case 0:
+                    Sonidos.reproducirMusicaJuego();
+                    juego.setScreen(new PantallaJuego(juego));
+                    break;
+                case 1:
+                    juego.setScreen(new PantallaOpciones(juego, this));
+                    break;
+                case 2:
+                    Gdx.app.exit();
+                    break;
             }
         }
     }
 
     @Override
     public void dispose() {
-        font.dispose();
-        fondo.dispose();
+        if (fondo != null) fondo.dispose();
     }
 }
