@@ -2,18 +2,17 @@ package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.logica.OpcionesInputHandler;
+import com.abyssdev.entertheabyss.mapas.SpawnPoint;
 import com.abyssdev.entertheabyss.ui.FontManager;
 import com.abyssdev.entertheabyss.ui.Sonidos;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -53,8 +52,8 @@ public class PantallaOpciones extends Pantalla {
     private static final float SLIDER_WIDTH = 300f;
     private static final float SLIDER_HEIGHT = 10f;
 
-    public PantallaOpciones(EnterTheAbyssPrincipal juego, Pantalla pantallaAnterior) {
-        super(juego);
+    public PantallaOpciones(Game juego, SpriteBatch batch, Pantalla pantallaAnterior) {
+        super(juego,batch);
         this.pantallaAnterior = pantallaAnterior;
 
         sliderMusicaBounds = new Rectangle();
@@ -112,24 +111,24 @@ public class PantallaOpciones extends Pantalla {
         manejarInputTeclado();
 
         camara.update();
-        juego.batch.setProjectionMatrix(camara.combined);
+        batch.setProjectionMatrix(camara.combined);
 
         float ancho = viewport.getWorldWidth();
         float alto = viewport.getWorldHeight();
         float centerX = ancho / 2f;
         float centerY = alto / 2f;
 
-        juego.batch.begin();
+        batch.begin();
 
         // Fondo oscurecido
-        juego.batch.setColor(0.3f, 0.3f, 0.3f, 1f);
-        juego.batch.draw(fondo, 0, 0, ancho, alto);
-        juego.batch.setColor(1, 1, 1, 1);
+        batch.setColor(0.3f, 0.3f, 0.3f, 1f);
+        batch.draw(fondo, 0, 0, ancho, alto);
+        batch.setColor(1, 1, 1, 1);
 
         // Título
         String titulo = "OPCIONES";
         layout.setText(titleFont, titulo);
-        titleFont.draw(juego.batch, titulo, centerX - layout.width / 2f, alto - 50);
+        titleFont.draw(batch, titulo, centerX - layout.width / 2f, alto - 50);
 
         // Volumen Música
         String textoMusica = "Volumen Musica";
@@ -141,7 +140,7 @@ public class PantallaOpciones extends Pantalla {
         } else {
             font.setColor(1, 1, 1, 0.8f);
         }
-        font.draw(juego.batch, textoMusica, centerX - layout.width / 2f, yMusica);
+        font.draw(batch, textoMusica, centerX - layout.width / 2f, yMusica);
 
         // Volumen Efectos
         String textoEfectos = "Volumen Efectos";
@@ -153,7 +152,7 @@ public class PantallaOpciones extends Pantalla {
         } else {
             font.setColor(1, 1, 1, 0.8f);
         }
-        font.draw(juego.batch, textoEfectos, centerX - layout.width / 2f, yEfectos);
+        font.draw(batch, textoEfectos, centerX - layout.width / 2f, yEfectos);
 
         // Botón Volver
         String textoVolver = "Volver";
@@ -165,7 +164,7 @@ public class PantallaOpciones extends Pantalla {
         } else {
             font.setColor(1, 1, 1, 0.8f);
         }
-        font.draw(juego.batch, textoVolver, centerX - layout.width / 2f, yVolver);
+        font.draw(batch, textoVolver, centerX - layout.width / 2f, yVolver);
 
         botonVolverBounds.set(
                 centerX - layout.width / 2f - 10,
@@ -174,7 +173,7 @@ public class PantallaOpciones extends Pantalla {
                 layout.height + 10
         );
 
-        juego.batch.end();
+        batch.end();
 
 
         shapeRenderer.setProjectionMatrix(camara.combined);
@@ -192,10 +191,10 @@ public class PantallaOpciones extends Pantalla {
 
         shapeRenderer.end();
 
-        juego.batch.begin();
+        batch.begin();
         dibujarPorcentaje(sliderMusicaX + SLIDER_WIDTH + 20, sliderMusicaY + 15, volumenMusica);
         dibujarPorcentaje(sliderEfectosX + SLIDER_WIDTH + 20, sliderEfectosY + 15, volumenEfectos);
-        juego.batch.end();
+        batch.end();
     }
 
     private void dibujarSlider(float x, float y, float valor, boolean seleccionado) {
@@ -221,7 +220,7 @@ public class PantallaOpciones extends Pantalla {
         String porcentaje = (int)(valor * 100) + "%";
         layout.setText(font, porcentaje);
         font.setColor(1, 1, 1, 1);
-        font.draw(juego.batch, porcentaje, x, y);
+        font.draw(batch, porcentaje, x, y);
     }
 
     private void manejarInputTeclado() {

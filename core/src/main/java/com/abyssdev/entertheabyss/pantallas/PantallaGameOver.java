@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
@@ -32,8 +33,8 @@ public class PantallaGameOver extends Pantalla {
     private Viewport viewport;
     private OrthographicCamera camara;
 
-    public PantallaGameOver(EnterTheAbyssPrincipal juego) {
-        super(juego);
+    public PantallaGameOver(Game juego,SpriteBatch batch) {
+        super(juego,batch);
     }
 
     @Override
@@ -68,13 +69,13 @@ public class PantallaGameOver extends Pantalla {
         manejarInput();
 
         camara.update();
-        juego.batch.setProjectionMatrix(camara.combined);
+        batch.setProjectionMatrix(camara.combined);
 
         float ancho = viewport.getWorldWidth();
         float alto = viewport.getWorldHeight();
 
-        juego.batch.begin();
-        juego.batch.draw(fondoPausa, 0, 0, ancho, alto);
+        batch.begin();
+        batch.draw(fondoPausa, 0, 0, ancho, alto);
 
         // ✅ Coordenadas fijas del marco (800x600)
         float centerX = 400f; // 800 / 2
@@ -92,10 +93,10 @@ public class PantallaGameOver extends Pantalla {
                 font.setColor(Color.WHITE);
             }
 
-            font.draw(juego.batch, texto, x, y);
+            font.draw(batch, texto, x, y);
         }
 
-        juego.batch.end();
+        batch.end();
     }
 
     @Override
@@ -117,7 +118,7 @@ public class PantallaGameOver extends Pantalla {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             switch (opcionSeleccionada) {
                 case 0:
-                    juego.setScreen(new MenuInicio(juego));
+                    juego.setScreen(new MenuInicio(juego,batch));
                     break;
                 case 1: // Salir
                     Gdx.app.exit();

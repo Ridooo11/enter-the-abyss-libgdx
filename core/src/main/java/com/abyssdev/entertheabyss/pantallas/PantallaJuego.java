@@ -9,9 +9,11 @@ import com.abyssdev.entertheabyss.logica.ManejoEntradas;
 import com.abyssdev.entertheabyss.personajes.Enemigo;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.abyssdev.entertheabyss.ui.Hud;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -42,10 +44,14 @@ public class PantallaJuego extends Pantalla {
     private Hud hud;
     private boolean yaInicializado = false;
 
-    public PantallaJuego(EnterTheAbyssPrincipal juego) {
-        super(juego);
+    public PantallaJuego(Game juego, SpriteBatch batch) {
+        super(juego, batch);
     }
-
+    //cambio a game, agregar por constructor el batch.
+    //
+     //
+     //
+     //
     @Override
     public void show() {
         if (!yaInicializado) {
@@ -185,7 +191,7 @@ public class PantallaJuego extends Pantalla {
                     jugador.recibirDanio(10);
                     if (jugador.getVida() <= 0) {
                         Sonidos.reproducirMusicaDerrota(); // ✅ Reproducir música de derrota
-                        juego.setScreen(new PantallaGameOver(juego));
+                        juego.setScreen(new PantallaGameOver(juego,batch));
                         return;
                     }
                 }
@@ -225,39 +231,39 @@ public class PantallaJuego extends Pantalla {
 
         actualizarCamara();
 
-        juego.batch.setProjectionMatrix(camara.combined);
-        juego.batch.begin();
+        batch.setProjectionMatrix(camara.combined);
+        batch.begin();
         for (Enemigo enemigo : salaActual.getEnemigos()) {
-            enemigo.renderizar(juego.batch);
+            enemigo.renderizar(batch);
         }
-        jugador.dibujar(juego.batch);
-        juego.batch.end();
+        jugador.dibujar(batch);
+        batch.end();
 
         if (hud != null) {
             hud.update();
-            hud.draw(juego.batch);
+            hud.draw(batch);
         }
 
         // Efecto FADE
         if (fadeAlpha > 0f) {
-            juego.batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-            juego.batch.begin();
+            batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            batch.begin();
 
-            juego.batch.setColor(0, 0, 0, fadeAlpha);
-            juego.batch.draw(texturaFade, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            batch.setColor(0, 0, 0, fadeAlpha);
+            batch.draw(texturaFade, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 
-            juego.batch.setColor(1, 1, 1, 1);
+            batch.setColor(1, 1, 1, 1);
 
-            juego.batch.end();
+            batch.end();
         }
 
         if (!enTransicion) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-                juego.setScreen(new PantallaPausa(juego, this));
+                juego.setScreen(new PantallaPausa(juego,batch, this));
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-                juego.setScreen(new PantallaArbolHabilidades(juego, this, jugador));
+                juego.setScreen(new PantallaArbolHabilidades(juego,batch, this, jugador));
             }
         }
     }

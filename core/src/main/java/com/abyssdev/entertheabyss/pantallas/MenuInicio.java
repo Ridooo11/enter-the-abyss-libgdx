@@ -3,6 +3,7 @@ package com.abyssdev.entertheabyss.pantallas;
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.ui.FontManager;
 import com.abyssdev.entertheabyss.ui.Sonidos;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -29,8 +31,8 @@ public class MenuInicio extends Pantalla {
     private Viewport viewport;
     private OrthographicCamera camara;
 
-    public MenuInicio(EnterTheAbyssPrincipal juego) {
-        super(juego);
+    public MenuInicio(Game juego, SpriteBatch batch) {
+        super(juego,batch);
     }
 
     @Override
@@ -60,14 +62,14 @@ public class MenuInicio extends Pantalla {
         manejarInput();
 
         camara.update();
-        juego.batch.setProjectionMatrix(camara.combined);
+        batch.setProjectionMatrix(camara.combined);
 
         float ancho = viewport.getWorldWidth();
         float alto = viewport.getWorldHeight();
         float centerX = ancho / 2f;
         float centerY = alto / 2f;
 
-        juego.batch.begin();
+        batch.begin();
         dibujarFondoCubriendo(fondo, ancho, alto);
 
         float startY = centerY - 80;
@@ -81,16 +83,16 @@ public class MenuInicio extends Pantalla {
             if (i == opcionSeleccionada) {
                 fontOpciones.setColor(1, 0, 0, alphaParpadeo);
                 layout.setText(fontOpciones, "►");
-                fontOpciones.draw(juego.batch, "►", x - 50, y);
-                fontOpciones.draw(juego.batch, "◄", x + layout.width + 30, y);
+                fontOpciones.draw(batch, "►", x - 50, y);
+                fontOpciones.draw(batch, "◄", x + layout.width + 30, y);
             } else {
                 fontOpciones.setColor(1, 1, 1, 0.6f);
             }
 
-            fontOpciones.draw(juego.batch, texto, centerX - layout.width / 2f, y);
+            fontOpciones.draw(batch, texto, centerX - layout.width / 2f, y);
         }
 
-        juego.batch.end();
+        batch.end();
     }
 
     private void actualizarAnimaciones(float delta) {
@@ -115,7 +117,7 @@ public class MenuInicio extends Pantalla {
             offsetY = (altoViewport - drawHeight) / 2f;
         }
 
-        juego.batch.draw(textura, offsetX, offsetY, drawWidth, drawHeight);
+       batch.draw(textura, offsetX, offsetY, drawWidth, drawHeight);
     }
 
     @Override
@@ -138,10 +140,10 @@ public class MenuInicio extends Pantalla {
             switch (opcionSeleccionada) {
                 case 0:
                     Sonidos.reproducirMusicaJuego();
-                    juego.setScreen(new PantallaJuego(juego));
+                    juego.setScreen(new PantallaJuego(juego,batch));
                     break;
                 case 1:
-                    juego.setScreen(new PantallaOpciones(juego, this));
+                    juego.setScreen(new PantallaOpciones(juego,batch, this));
                     break;
                 case 2:
                     Gdx.app.exit();

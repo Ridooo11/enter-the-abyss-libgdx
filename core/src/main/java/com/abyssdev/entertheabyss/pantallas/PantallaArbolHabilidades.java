@@ -3,6 +3,7 @@ package com.abyssdev.entertheabyss.pantallas;
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.habilidades.Habilidad;
 import com.abyssdev.entertheabyss.personajes.Jugador;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
@@ -42,8 +43,8 @@ public class PantallaArbolHabilidades extends Pantalla {
     private Viewport viewport;
     private OrthographicCamera camara;
 
-    public PantallaArbolHabilidades(EnterTheAbyssPrincipal juego, PantallaJuego pantallaJuego, Jugador jugador) {
-        super(juego);
+    public PantallaArbolHabilidades(Game juego,SpriteBatch batch, PantallaJuego pantallaJuego, Jugador jugador) {
+        super(juego,batch);
         this.pantallaJuego = pantallaJuego;
         this.jugador = jugador;
     }

@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -28,8 +30,8 @@ public class PantallaPausa extends Pantalla {
     private Viewport viewport;
     private OrthographicCamera camara;
 
-    public PantallaPausa(EnterTheAbyssPrincipal juego, PantallaJuego pantallaJuego) {
-        super(juego);
+    public PantallaPausa(Game juego, SpriteBatch batch, PantallaJuego pantallaJuego) {
+        super(juego,batch);
         this.pantallaJuego = pantallaJuego;
     }
 
@@ -62,13 +64,13 @@ public class PantallaPausa extends Pantalla {
         manejarInput();
 
         camara.update();
-        juego.batch.setProjectionMatrix(camara.combined);
+        batch.setProjectionMatrix(camara.combined);
 
         float ancho = viewport.getWorldWidth();
         float alto = viewport.getWorldHeight();
 
-        juego.batch.begin();
-        juego.batch.draw(fondoPausa, 0, 0, ancho, alto);
+        batch.begin();
+        batch.draw(fondoPausa, 0, 0, ancho, alto);
 
         float centerX = 400f;
         float centerY = 300f;
@@ -85,10 +87,10 @@ public class PantallaPausa extends Pantalla {
                 font.setColor(Color.WHITE);
             }
 
-            font.draw(juego.batch, texto, x, y);
+            font.draw(batch, texto, x, y);
         }
 
-        juego.batch.end();
+        batch.end();
     }
 
     @Override
@@ -113,7 +115,7 @@ public class PantallaPausa extends Pantalla {
                     juego.setScreen(pantallaJuego);
                     break;
                 case 1:
-                    juego.setScreen(new PantallaOpciones(juego, this));
+                    juego.setScreen(new PantallaOpciones(juego,batch, this));
                     break;
                 case 2:
                     Gdx.app.exit();
