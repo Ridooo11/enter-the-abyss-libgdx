@@ -57,9 +57,9 @@ public class PantallaJuego extends Pantalla {
         if (!yaInicializado) {
             jugador = new Jugador();
             mapaActual = new Mapa("mazmorra1");
-            mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx"));
-            mapaActual.agregarSala(new Sala("sala2", "maps/mapa1_sala2.tmx"));
-            //mapaActual.agregarSala(new Sala("sala3", "maps/mapa1_sala3.tmx"));
+            mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx",1));
+            mapaActual.agregarSala(new Sala("sala2", "maps/mapa1_sala2.tmx",1));
+            mapaActual.agregarSala(new Sala("sala3", "maps/mapa2_posible.tmx",15));
 
             camara = new OrthographicCamera();
             viewport = new FitViewport(32, 32 * (9f / 16f), camara);
@@ -133,7 +133,7 @@ public class PantallaJuego extends Pantalla {
         salaActual.getRenderer().setView(camara);
 
         if (salaActual.getEnemigos() == null || salaActual.getEnemigos().isEmpty()) {
-            salaActual.generarEnemigos(5);
+            salaActual.generarEnemigos();
         }
     }
 

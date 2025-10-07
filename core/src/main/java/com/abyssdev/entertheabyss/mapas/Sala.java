@@ -12,6 +12,7 @@ import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Timer;
 
 import java.util.ArrayList;
 
@@ -24,17 +25,18 @@ public class Sala {
     private Array<ZonaTransicion> zonasTransicion;
     private ArrayList<Enemigo> enemigos;
     private Array<SpawnPoint> spawnPoints;
-
+    private int cantidadEnemigos;
+    private boolean enemigosGenerados = false;
     private float anchoTiles, altoTiles;
     private static final float TILE_SIZE = 16f;
 
-    public Sala(String id, String rutaTmx) {
+    public Sala(String id, String rutaTmx, int cantidadEnemigos) {
         this.id = id;
+        this.cantidadEnemigos = cantidadEnemigos;
         cargarMapa(rutaTmx);
         cargarColisiones();
         cargarZonasTransicion();
         cargarSpawnPoints();
-        generarEnemigos(2); // cantidad default
     }
 
     private void cargarMapa(String ruta) {
@@ -93,12 +95,20 @@ public class Sala {
         }
     }
 
-    public void generarEnemigos(int cantidad) {
+    public void generarEnemigos() {
         enemigos = new ArrayList<>();
-        for (int i = 0; i < cantidad; i++) {
-            float x = MathUtils.random(2f, getAnchoMundo() - 2f);
-            float y = MathUtils.random(2f, getAltoMundo() - 2f);
-            enemigos.add(new Enemigo(x, y));
+
+        for (int i = 0; i < cantidadEnemigos; i++) {
+            final int index = i;
+
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    float x = MathUtils.random(2f, getAnchoMundo() - 2f);
+                    float y = MathUtils.random(2f, getAltoMundo() - 2f);
+                    enemigos.add(new Enemigo(x, y));
+                }
+            }, index * 1.5f);
         }
     }
 
