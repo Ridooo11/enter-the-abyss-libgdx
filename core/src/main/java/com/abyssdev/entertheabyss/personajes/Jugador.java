@@ -14,7 +14,7 @@ import com.abyssdev.entertheabyss.ui.Sonidos;
 public class Jugador {
     private Vector2 posicion;
     private float ancho = 3f, alto = 3f;
-    private final float velocidad = 5f;
+    private final float velocidad = 3.2f;
 
     private int vida = 100;
     private int vidaMaxima = 100;

@@ -3,6 +3,7 @@ package com.abyssdev.entertheabyss.logica;
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.pantallas.Pantalla;
 import com.abyssdev.entertheabyss.pantallas.PantallaOpciones;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -15,7 +16,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class OpcionesInputHandler extends InputAdapter {
 
     private final PantallaOpciones pantalla;
-    private final EnterTheAbyssPrincipal juego;
+    private final Game juego;
     private final Pantalla pantallaAnterior;
     private final Viewport viewport;
 
@@ -30,7 +31,7 @@ public class OpcionesInputHandler extends InputAdapter {
 
     public OpcionesInputHandler(
         PantallaOpciones pantalla,
-        EnterTheAbyssPrincipal juego,
+        Game juego,
         Pantalla pantallaAnterior,
         Viewport viewport,
         Rectangle sliderMusicaBounds,

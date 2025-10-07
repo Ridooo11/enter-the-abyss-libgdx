@@ -77,8 +77,8 @@ public class PantallaOpciones extends Pantalla {
 
         // Cargar preferencias
         prefs = Gdx.app.getPreferences("EnterTheAbyss_Settings");
-        this.volumenMusica = juego.getPreferencias().getFloat("volumenMusica", .2f);
-        this.volumenEfectos = juego.getPreferencias().getFloat("volumenEfectos", .2f);
+       // this.volumenMusica = juego.getPreferencias().getFloat("volumenMusica", .2f);
+        //this.volumenEfectos = juego.getPreferencias().getFloat("volumenEfectos", .2f);
 
 
         Sonidos.setVolumenMusica(volumenMusica);

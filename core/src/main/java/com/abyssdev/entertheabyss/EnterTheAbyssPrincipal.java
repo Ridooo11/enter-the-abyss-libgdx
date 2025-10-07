@@ -27,7 +27,7 @@ public class EnterTheAbyssPrincipal extends Game {
         Sonidos.setVolumenEfectos(volumenEfectos);
 
         // Arrancar en el menú
-        setScreen(new MenuInicio(this));
+        setScreen(new MenuInicio(this,batch));
     }
 
     @Override

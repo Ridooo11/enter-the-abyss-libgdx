@@ -59,6 +59,8 @@ public class PantallaJuego extends Pantalla {
             mapaActual = new Mapa("mazmorra1");
             mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx"));
             mapaActual.agregarSala(new Sala("sala2", "maps/mapa1_sala2.tmx"));
+            //mapaActual.agregarSala(new Sala("sala3", "maps/mapa1_sala3.tmx"));
+
             camara = new OrthographicCamera();
             viewport = new FitViewport(32, 32 * (9f / 16f), camara);
             texturaFade = generarTextura();
@@ -154,6 +156,14 @@ public class PantallaJuego extends Pantalla {
 
         for (ZonaTransicion zona : salaActual.getZonasTransicion()) {
             if (hitboxJugador.overlaps(zona)) {
+//                if (!zona.pasaMapa) {
+//                    return;
+//                }
+                if (salaActual.hayEnemigosVivos()) {
+                    System.out.println("No se ha matado a todos los enemigos");
+                    //Se podria mostrar algun mensaje al jugador
+                    return;
+                }
                 String destinoId = zona.destinoSalaId;
                 Sala salaDestino = mapaActual.getSala(destinoId);
 

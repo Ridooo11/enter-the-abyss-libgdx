@@ -17,8 +17,8 @@ public class Enemigo {
 
     private static final float VELOCIDAD = 3f;
     private static final float TAMANO = 3f;
-    private static final float DISTANCIA_ATAQUE = 1f;
-    private static final float COOLDOWN_ATAQUE = 1f;
+    private static final float DISTANCIA_ATAQUE = 0.8f;
+    private static final float COOLDOWN_ATAQUE = 4f;
 
     private float tiempoDesdeUltimoAtaque = 0;
     private float tiempoDesdeUltimoGolpe = 0f;

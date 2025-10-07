@@ -34,7 +34,7 @@ public class Sala {
         cargarColisiones();
         cargarZonasTransicion();
         cargarSpawnPoints();
-        generarEnemigos(5); // cantidad default
+        generarEnemigos(2); // cantidad default
     }
 
     private void cargarMapa(String ruta) {
@@ -80,7 +80,7 @@ public class Sala {
             Rectangle rect = rectObj.getRectangle();
             String destino = objeto.getProperties().get("destino", String.class);
             String spawnName = objeto.getProperties().get("spawn_centro", "default", String.class); // propiedad clave
-
+            //boolean pasaMapa = objeto.getProperties().get("pasaMapa", false, Boolean.class);
             zonasTransicion.add(new ZonaTransicion(
                 rect.x / TILE_SIZE,
                 rect.y / TILE_SIZE,
@@ -88,6 +88,7 @@ public class Sala {
                 rect.height / TILE_SIZE,
                 destino,
                 spawnName
+                //pasaMapa
             ));
         }
     }
@@ -121,6 +122,13 @@ public class Sala {
             spawnPoints.add(new SpawnPoint(x, y, name, salaId));
         }
     }
+    public boolean hayEnemigosVivos() {
+        if (this.enemigos == null) return false;
+        for (Enemigo e : this.enemigos) {
+            if (!e.debeEliminarse()) return true;
+        }
+        return false;
+    }
 
     // GETTERS
     public String getId() { return id; }
@@ -139,4 +147,5 @@ public class Sala {
         if (mapa != null) mapa.dispose();
         if (renderer != null) renderer.dispose();
     }
+
 }
