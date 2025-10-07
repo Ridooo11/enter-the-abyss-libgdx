@@ -9,12 +9,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.abyssdev.entertheabyss.ui.Sonidos;
 
 public class Jugador {
     private Vector2 posicion;
     private float ancho = 3f, alto = 3f;
-    private final float velocidad = 3.2f;
+    private float velocidad = 3.2f; // 🔹 ahora modificable
 
     private int vida = 100;
     private int vidaMaxima = 100;
@@ -46,6 +45,10 @@ public class Jugador {
     private boolean atacandoAplicado;
     private float duracionHitboxAtaque = 0.1f;
     private float tiempoHitboxActivo;
+
+    private float tiempoUltimoAtaque = 0f; // Tiempo desde el último ataque
+    private float cooldownAtaque = 1f;   // Segundos entre ataques
+
 
     public Jugador() {
         this.posicion = new Vector2(100, 100);
@@ -209,6 +212,8 @@ public class Jugador {
         } else {
             estadoTiempo += delta;
         }
+
+        tiempoUltimoAtaque += delta;
     }
 
     public void dibujar(SpriteBatch batch) {
@@ -241,31 +246,32 @@ public class Jugador {
         switch (direccionActual) {
             case ABAJO:
                 offsetX = (ancho - hitboxWidth) / 2;
-                offsetY = -0.5f; // ✅ Justo debajo del jugador (punta de la espada)
+                offsetY = -0.5f;
                 break;
             case ARRIBA:
                 offsetX = (ancho - hitboxWidth) / 2;
-                offsetY = alto; // ✅ Justo encima del jugador
+                offsetY = alto;
                 break;
             case IZQUIERDA:
-                offsetX = -0.5f; // ✅ Justo a la izquierda (punta de la espada)
+                offsetX = -0.5f;
                 offsetY = (alto - hitboxHeight) / 2;
                 break;
             case DERECHA:
-                offsetX = ancho; // ✅ Justo a la derecha (punta de la espada)
+                offsetX = ancho;
                 offsetY = (alto - hitboxHeight) / 2;
                 break;
         }
         hitboxAtaque.set(posicion.x + offsetX, posicion.y + offsetY, hitboxWidth, hitboxHeight);
-        System.out.println("[Jugador] Hitbox de ataque: " + hitboxAtaque.toString()); // ✅ Verificar posición
+        System.out.println("[Jugador] Hitbox de ataque: " + hitboxAtaque.toString());
     }
 
     public void atacar() {
-        if (accionActual != Accion.ATAQUE && accionActual != Accion.MUERTE) {
+        if (tiempoUltimoAtaque >= cooldownAtaque && accionActual != Accion.MUERTE) {
             accionActual = Accion.ATAQUE;
             estadoTiempo = 0;
             atacandoAplicado = false;
             tiempoHitboxActivo = 0;
+            tiempoUltimoAtaque = 0;
             Sonidos.reproducirAtaque();
         }
     }
@@ -275,8 +281,18 @@ public class Jugador {
             accionActual = Accion.MUERTE;
             estadoTiempo = 0;
             atacandoAplicado = false;
-            hitboxAtaque.setSize(0,0);
+            hitboxAtaque.setSize(0, 0);
         }
+    }
+
+    // --- NUEVOS MÉTODOS PARA ÁRBOL DE HABILIDADES ---
+    public void aumentarVelocidad(float incremento) {
+        this.velocidad += incremento;
+        Gdx.app.log("Jugador", "Nueva velocidad: " + this.velocidad);
+    }
+
+    public float getVelocidad() {
+        return this.velocidad;
     }
 
     // --- GETTERS ---
