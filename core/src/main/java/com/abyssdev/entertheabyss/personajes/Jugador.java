@@ -1,5 +1,6 @@
 package com.abyssdev.entertheabyss.personajes;
 
+import com.abyssdev.entertheabyss.habilidades.*;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -10,16 +11,20 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Jugador {
     private Vector2 posicion;
     private float ancho = 3f, alto = 3f;
-    private float velocidad = 3.2f; // 🔹 ahora modificable
+    private float velocidad = 3.2f;
 
     private int vida = 100;
     private int vidaMaxima = 100;
     private int municionActual = 30;
     private int municionMaxima = 30;
     private int monedas = 0;
+    private int danioBase = 5;
 
     // HITBOX
     private final float anchoHitbox = 1f;
@@ -46,9 +51,12 @@ public class Jugador {
     private float duracionHitboxAtaque = 0.1f;
     private float tiempoHitboxActivo;
 
-    private float tiempoUltimoAtaque = 0f; // Tiempo desde el último ataque
-    private float cooldownAtaque = 1f;   // Segundos entre ataques
+    private float tiempoUltimoAtaque = 0f;
+    private float cooldownAtaque = 1f;
+    private float porcentajeReduccionDanio = 0f;
 
+    // 🔹 HABILIDADES DEL JUGADOR
+    private Map<String, Habilidad> habilidades;
 
     public Jugador() {
         this.posicion = new Vector2(100, 100);
@@ -56,6 +64,26 @@ public class Jugador {
         inicializarMapaFilas();
         cargarAnimaciones();
         hitboxAtaque = new Rectangle(0, 0, 0, 0);
+        // 🔹 Inicializar habilidades aquí
+        inicializarHabilidades();
+    }
+
+    private void inicializarHabilidades() {
+        habilidades = new HashMap<>();
+        habilidades.put("Vida", new HabilidadVida());
+        habilidades.put("Defensa", new HabilidadDefensa());
+        habilidades.put("Regen", new HabilidadRegeneracion());
+        habilidades.put("Ataque", new HabilidadFuerza());
+        habilidades.put("Combo", new HabilidadAtaqueVeloz());
+        habilidades.put("Critico", new HabilidadGolpeCritico());
+        habilidades.put("Velocidad", new HabilidadVelocidad());
+        habilidades.put("Velocidad II", new HabilidadVelocidad2());
+        habilidades.put("Evasion", new HabilidadEvasion());
+    }
+
+    // 🔹 Getter para que otras pantallas accedan
+    public Map<String, Habilidad> getHabilidades() {
+        return habilidades;
     }
 
     private void inicializarMapaFilas() {
@@ -291,8 +319,38 @@ public class Jugador {
         Gdx.app.log("Jugador", "Nueva velocidad: " + this.velocidad);
     }
 
+    public void reducirCooldownAtaque(float reduccion) {
+        this.cooldownAtaque -= reduccion;
+        Gdx.app.log("Jugador", "Nueva velocidad de ataque: " + this.cooldownAtaque);
+    }
+
+    public void aumentarDanio(int cantidad) {
+        this.danioBase += cantidad;
+        Gdx.app.log("Jugador", "Daño aumentado a: " + this.danioBase);
+    }
+
+    public void habilitarEvasion(boolean b) {
+        // Implementar si se necesita
+    }
+
     public float getVelocidad() {
         return this.velocidad;
+    }
+
+    public void aumentarVidaMaxima(int i) {
+        this.vidaMaxima += i;
+        this.vida = Math.min(this.vida, this.vidaMaxima);
+        Gdx.app.log("Jugador", "Vida máxima aumentada a: " + this.vidaMaxima);
+    }
+
+    public void reducirDanioRecibido(float porcentaje) {
+        this.porcentajeReduccionDanio += porcentaje;
+        this.porcentajeReduccionDanio = Math.min(0.9f, this.porcentajeReduccionDanio);
+        Gdx.app.log("Jugador", "Reducción de daño actual: " + (int)(this.porcentajeReduccionDanio * 100) + "%");
+    }
+
+    public void activarRegeneracion(float reduccion) {
+        // Implementar si se necesita
     }
 
     // --- GETTERS ---
@@ -301,6 +359,7 @@ public class Jugador {
     public int getMunicionActual() { return this.municionActual; }
     public int getMunicionMaxima() { return this.municionMaxima; }
     public int getMonedas() { return this.monedas; }
+    public int getDanio() { return this.danioBase; }
     public float getX() { return posicion.x; }
     public float getY() { return posicion.y; }
     public Vector2 getPosicion() { return posicion; }
@@ -337,6 +396,14 @@ public class Jugador {
         if (hojaSprite != null) {
             hojaSprite.dispose();
         }
+        // 🔹 Liberar texturas de habilidades
+        if (habilidades != null) {
+            for (Habilidad h : habilidades.values()) {
+                if (h.getIcono() != null) {
+                    h.getIcono().dispose();
+                }
+            }
+        }
     }
 
     public void setX(float x) { this.posicion.x = x; }
@@ -348,8 +415,17 @@ public class Jugador {
     public void moverIzquierda(boolean activo) { this.izquierda = activo; }
     public void moverDerecha(boolean activo) { this.derecha = activo; }
 
-    public void recibirDanio(int i) {
-        this.vida -= i;
-        Gdx.app.log("Jugador", "Vida actual: " + this.vida);
+    public void recibirDanio(int danioBruto) {
+        if (danioBruto <= 0) return;
+
+        float danioReducido = danioBruto * (1f - porcentajeReduccionDanio);
+        int danioFinal = Math.max(1, (int) Math.floor(danioReducido));
+
+        this.vida -= danioFinal;
+        Gdx.app.log("Jugador",
+            "Daño recibido: " + danioFinal +
+                " (original: " + danioBruto +
+                ", reducción: " + (int)(porcentajeReduccionDanio * 100) + "%). " +
+                "Vida actual: " + this.vida);
     }
 }

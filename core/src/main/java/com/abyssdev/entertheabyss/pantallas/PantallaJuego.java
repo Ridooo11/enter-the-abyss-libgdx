@@ -47,11 +47,7 @@ public class PantallaJuego extends Pantalla {
     public PantallaJuego(Game juego, SpriteBatch batch) {
         super(juego, batch);
     }
-    //cambio a game, agregar por constructor el batch.
-    //
-     //
-     //
-     //
+
     @Override
     public void show() {
         if (!yaInicializado) {
@@ -158,12 +154,8 @@ public class PantallaJuego extends Pantalla {
 
         for (ZonaTransicion zona : salaActual.getZonasTransicion()) {
             if (hitboxJugador.overlaps(zona)) {
-//                if (!zona.pasaMapa) {
-//                    return;
-//                }
                 if (salaActual.hayEnemigosVivos()) {
                     System.out.println("No se ha matado a todos los enemigos");
-                    //Se podria mostrar algun mensaje al jugador
                     return;
                 }
                 String destinoId = zona.destinoSalaId;
@@ -202,19 +194,17 @@ public class PantallaJuego extends Pantalla {
                 if (enemigo.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos)) {
                     jugador.recibirDanio(10);
                     if (jugador.getVida() <= 0) {
-                        //Sonidos.reproducirMusicaDerrota(); // saco esto porque deberia ser responsabilidad de pantallagameover
                         juego.setScreen(new PantallaGameOver(juego,batch));
                         return;
                     }
                 }
             }
 
-            // ✅ Tercero: verificar ataque del jugador
             if (jugador.getHitboxAtaque().getWidth() > 0) {
                 for (int i = enemigos.size() - 1; i >= 0; i--) {
                     Enemigo enemigo = enemigos.get(i);
                     if (!enemigo.debeEliminarse() && jugador.getHitboxAtaque().overlaps(enemigo.getRectangulo())) {
-                        enemigo.recibirGolpe();
+                        enemigo.recibirDanio(jugador.getDanio());
                     }
                 }
             }
@@ -256,17 +246,12 @@ public class PantallaJuego extends Pantalla {
             hud.draw(batch);
         }
 
-        // Efecto FADE
         if (fadeAlpha > 0f) {
             batch.getProjectionMatrix().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             batch.begin();
-
             batch.setColor(0, 0, 0, fadeAlpha);
             batch.draw(texturaFade, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-
             batch.setColor(1, 1, 1, 1);
-
             batch.end();
         }
 
@@ -275,7 +260,8 @@ public class PantallaJuego extends Pantalla {
                 juego.setScreen(new PantallaPausa(juego,batch, this));
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-                juego.setScreen(new PantallaArbolHabilidades(juego,batch, this, jugador));
+                // ✅ Ahora se obtienen las habilidades del jugador
+                juego.setScreen(new PantallaArbolHabilidades(juego, batch, this, jugador, jugador.getHabilidades()));
             }
         }
     }
@@ -327,9 +313,8 @@ public class PantallaJuego extends Pantalla {
             hud.dispose();
         }
         if (jugador != null) {
-            jugador.dispose();
+            jugador.dispose(); // ✅ Esto ahora libera también las texturas de habilidades
         }
-
         if (texturaFade != null) {
             texturaFade.dispose();
         }

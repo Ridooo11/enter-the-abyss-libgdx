@@ -19,10 +19,10 @@ public class Enemigo {
     private static final float TAMANO = 3f;
     private static final float DISTANCIA_ATAQUE = 0.8f;
     private static final float COOLDOWN_ATAQUE = 4f;
+    private static final float COOLDOWN_GOLPE = 0.1f;
 
     private float tiempoDesdeUltimoAtaque = 0;
     private float tiempoDesdeUltimoGolpe = 0f;
-    private static final float COOLDOWN_GOLPE = 0.1f;
 
     private Texture hojaSprite;
     private Vector2 posicion;
@@ -39,8 +39,9 @@ public class Enemigo {
     private boolean eliminar;
     private boolean haciaIzquierda;
 
-    private int golpesRecibidos = 0;
-    private static final int GOLPES_PARA_MORIR = 3;
+    // 🔹 Sistema de vida en lugar de golpes
+    private int vida = 30;
+    private int vidaMaxima = 30;
 
     public Enemigo(float x, float y) {
         hojaSprite = new Texture("personajes/esqueletoEnemigo.png");
@@ -50,7 +51,6 @@ public class Enemigo {
         tiempoEstado = 0;
         eliminar = false;
         haciaIzquierda = false;
-        golpesRecibidos = 0;
         tiempoDesdeUltimoGolpe = 0;
         tiempoDesdeUltimoAtaque = 0;
         cargarAnimaciones();
@@ -167,18 +167,19 @@ public class Enemigo {
         }
     }
 
-    public void recibirGolpe() {
-        if (tiempoDesdeUltimoGolpe < COOLDOWN_GOLPE) return;
+    // 🔹 Recibe daño real en lugar de contar golpes
+    public void recibirDanio(int danio) {
+        if (tiempoDesdeUltimoGolpe < COOLDOWN_GOLPE || estado == Estado.MUERTO) return;
 
-        golpesRecibidos++;
+        this.vida -= danio;
+        Gdx.app.log("Enemigo", "Recibió " + danio + " de daño. Vida restante: " + this.vida);
+
         cambiarEstado(Estado.HIT);
-        System.out.println("🔥 Enemigo recibió golpe " + golpesRecibidos + "/" + GOLPES_PARA_MORIR); // ✅ Verificar golpes
+        tiempoDesdeUltimoGolpe = 0f;
 
-        if (golpesRecibidos >= GOLPES_PARA_MORIR) {
+        if (this.vida <= 0) {
             morir();
         }
-
-        tiempoDesdeUltimoGolpe = 0f;
     }
 
     public void morir() {
@@ -205,5 +206,14 @@ public class Enemigo {
 
     public Vector2 getPosicion() {
         return posicion;
+    }
+
+    // 🔹 Getters de vida (útiles para UI o debugging)
+    public int getVida() {
+        return this.vida;
+    }
+
+    public int getVidaMaxima() {
+        return this.vidaMaxima;
     }
 }
