@@ -202,7 +202,7 @@ public class PantallaJuego extends Pantalla {
                 if (enemigo.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos)) {
                     jugador.recibirDanio(10);
                     if (jugador.getVida() <= 0) {
-                        Sonidos.reproducirMusicaDerrota(); // ✅ Reproducir música de derrota
+                        //Sonidos.reproducirMusicaDerrota(); // saco esto porque deberia ser responsabilidad de pantallagameover
                         juego.setScreen(new PantallaGameOver(juego,batch));
                         return;
                     }
