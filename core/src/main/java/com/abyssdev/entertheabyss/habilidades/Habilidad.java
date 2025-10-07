@@ -10,6 +10,7 @@ public class Habilidad {
     public boolean desbloqueado = false;
     public int nivelActual = 0;
     public int nivelMaximo = 3;
+    public boolean comprada = false;
 
     public Habilidad(String nombre, String descripcion, int costo, String iconoPath) {
         this.nombre = nombre;
@@ -25,4 +26,6 @@ public class Habilidad {
     public Texture getIcono() {
         return this.icono;
     }
+
+    public int getCosto(){return this.costo;}
 }
