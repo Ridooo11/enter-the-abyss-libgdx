@@ -99,7 +99,7 @@ public class Sala {
         enemigos = new ArrayList<>();
 
         for (int i = 0; i < cantidadEnemigos; i++) {
-            final int index = i;
+            final int delay = i;
 
             Timer.schedule(new Timer.Task() {
                 @Override
@@ -108,7 +108,7 @@ public class Sala {
                     float y = MathUtils.random(2f, getAltoMundo() - 2f);
                     enemigos.add(new Enemigo(x, y));
                 }
-            }, index * 1.5f);
+            }, delay * 1.5f);
         }
     }
 
