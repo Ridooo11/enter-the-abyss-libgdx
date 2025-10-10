@@ -55,19 +55,20 @@ public class Hud {
 
         // --- DIBUJAR CORAZONES ---
         int vidaActual = jugador.getVida();
-        int vidaMaxima = jugador.getVidaMaxima(); // Debe ser 100
+        int vidaMaxima = jugador.getVidaMaxima(); // Ejemplo: 100 o 120
 
-        // Posición de los corazones
+        int corazonesTotales = (int)Math.ceil(vidaMaxima / 20f); // 🔹 1 corazón por cada 20 puntos
         startX = 20f;
         startY = screenHeight - 40f;
 
         float x = startX;
 
-        for (int i = 0; i < 5; i++) {
-            int vidaPorCorazon = 20; // Cada corazón tiene 20 puntos
+        for (int i = 0; i < corazonesTotales; i++) {
+            int vidaPorCorazon = 20;
             int vidaRestante = vidaActual - (i * vidaPorCorazon);
 
             if (vidaRestante <= 0) {
+                // 🔹 Si el jugador tiene menos vida que el inicio de este corazón, se dibuja vacío o nada
                 continue;
             }
 
@@ -88,18 +89,13 @@ public class Hud {
         // --- DIBUJAR MONEDAS ---
         int monedas = jugador.getMonedas();
 
-        // Posición de la moneda
         monedaX = screenWidth - 60f;
         monedaY = 20f;
 
-        // Dibujar la imagen de moneda
         batch.draw(moneda, monedaX, monedaY);
 
-        // Dibujar el número de monedas
         String textoMonedas = "x" + monedas;
         layout.setText(font, textoMonedas);
-        float textoAncho = layout.width;
-
         float textoX = monedaX + moneda.getWidth() + 5f;
         float textoY = monedaY + moneda.getHeight() / 2f + font.getLineHeight() / 2f;
 
@@ -107,7 +103,7 @@ public class Hud {
         font.draw(batch, textoMonedas, textoX, textoY);
 
         batch.end();
-        batch.setProjectionMatrix(originalProjection); // Restaurar proyección
+        batch.setProjectionMatrix(originalProjection);
     }
 
     public void dispose() {

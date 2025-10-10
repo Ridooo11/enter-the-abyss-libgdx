@@ -13,6 +13,8 @@ public class Sonidos {
 
     // ✅ Efectos
     private static Sound sonidoAtaque;
+    private static Sound compraExitosa;
+    private static Sound compraFallida;
 
     public static void cargar() {
         // Música
@@ -31,6 +33,9 @@ public class Sonidos {
 
         // Efectos
         sonidoAtaque = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/espada.mp3"));
+        compraExitosa = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/compra_exitosa.mp3"));
+        compraFallida = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/compra_fallida.mp3"));
+
     }
 
     // ✅ Efectos
@@ -38,6 +43,14 @@ public class Sonidos {
         if (sonidoAtaque != null) {
             sonidoAtaque.play(0.8f);
         }
+    }
+
+    public static void reproducirCompraExitosa() {
+        compraExitosa.play(1.0f);
+    }
+
+    public static void reproducirCompraFallida() {
+        compraFallida.play(1.0f);
     }
 
     private static float volumenMusica = 0.5f;
@@ -94,11 +107,6 @@ public class Sonidos {
         musicaDerrota.play();
     }
 
-    // ✅ Para efectos de sonido (ejemplo)
-    public static void reproducirEfectoGolpe() {
-        Sound efecto = Gdx.audio.newSound(Gdx.files.internal("sonidos/golpe.wav"));
-        efecto.play(volumenEfectos); // ⬅️ Usar volumenEfectos
-    }
 
     public static void detenerTodaMusica() {
         musicaMenu.stop();

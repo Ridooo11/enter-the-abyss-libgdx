@@ -55,6 +55,11 @@ public class Jugador {
     private float cooldownAtaque = 1f;
     private float porcentajeReduccionDanio = 0f;
 
+    private boolean regeneracionActiva = false;
+    private float tiempoRegeneracion = 0f;
+    private float intervaloRegeneracion = 1f; // Cada 1 segundo
+    private int cantidadRegeneracion = 1;
+
     // 🔹 HABILIDADES DEL JUGADOR
     private Map<String, Habilidad> habilidades;
 
@@ -70,15 +75,15 @@ public class Jugador {
 
     private void inicializarHabilidades() {
         habilidades = new HashMap<>();
-        habilidades.put("Vida", new HabilidadVida());
+        habilidades.put("Vida Extra", new HabilidadVida());
         habilidades.put("Defensa", new HabilidadDefensa());
-        habilidades.put("Regen", new HabilidadRegeneracion());
-        habilidades.put("Ataque", new HabilidadFuerza());
-        habilidades.put("Combo", new HabilidadAtaqueVeloz());
-        habilidades.put("Critico", new HabilidadGolpeCritico());
+        habilidades.put("Regeneración", new HabilidadRegeneracion());
+        habilidades.put("Fuerza", new HabilidadFuerza());
+        habilidades.put("Ataque Veloz", new HabilidadAtaqueVeloz());
+        habilidades.put("Golpe Crítico", new HabilidadGolpeCritico());
         habilidades.put("Velocidad", new HabilidadVelocidad());
         habilidades.put("Velocidad II", new HabilidadVelocidad2());
-        habilidades.put("Evasion", new HabilidadEvasion());
+        habilidades.put("Evasión", new HabilidadEvasion());
     }
 
     // 🔹 Getter para que otras pantallas accedan
@@ -241,8 +246,20 @@ public class Jugador {
             estadoTiempo += delta;
         }
 
+        // --- TIEMPO ENTRE ATAQUES ---
         tiempoUltimoAtaque += delta;
+
+        // --- REGENERACIÓN DE VIDA AUTOMÁTICA ---
+        if (regeneracionActiva && vida < vidaMaxima) {
+            tiempoRegeneracion += delta;
+            if (tiempoRegeneracion >= intervaloRegeneracion) {
+                tiempoRegeneracion = 0f;
+                vida = Math.min(vida + cantidadRegeneracion, vidaMaxima);
+                Gdx.app.log("Jugador", "Regenerando vida... (" + vida + "/" + vidaMaxima + ")");
+            }
+        }
     }
+
 
     public void dibujar(SpriteBatch batch) {
         Animation<TextureRegion> currentAnimation = animaciones[accionActual.ordinal()][direccionActual.ordinal()];
@@ -349,9 +366,13 @@ public class Jugador {
         Gdx.app.log("Jugador", "Reducción de daño actual: " + (int)(this.porcentajeReduccionDanio * 100) + "%");
     }
 
-    public void activarRegeneracion(float reduccion) {
-        // Implementar si se necesita
+    public void activarRegeneracion(int cantidadPorSegundo) {
+        this.regeneracionActiva = true;
+        this.cantidadRegeneracion = cantidadPorSegundo;
+        this.tiempoRegeneracion = 0f;
+        Gdx.app.log("Jugador", "Regeneración activada: +" + cantidadPorSegundo + " por segundo");
     }
+
 
     // --- GETTERS ---
     public int getVida() { return this.vida; }
