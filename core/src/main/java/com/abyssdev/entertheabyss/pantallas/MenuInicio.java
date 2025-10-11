@@ -20,7 +20,7 @@ public class MenuInicio extends Pantalla {
     private BitmapFont fontOpciones;
     private Texture fondo;
 
-    private final String[] opciones = {"Comenzar", "Opciones", "Salir"};
+    private final String[] opciones = {"Comenzar", "Opciones", "Tutorial", "Salir"};
     private int opcionSeleccionada = 0;
 
     private float tiempoParpadeo = 0;
@@ -146,6 +146,9 @@ public class MenuInicio extends Pantalla {
                     juego.setScreen(new PantallaOpciones(juego,batch, this));
                     break;
                 case 2:
+                    juego.setScreen(new PantallaTutorial(juego,batch, this));
+                    break;
+                case 3:
                     Gdx.app.exit();
                     break;
             }

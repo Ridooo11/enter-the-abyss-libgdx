@@ -20,7 +20,7 @@ public class PantallaPausa extends Pantalla {
     private BitmapFont font;
     private Texture fondoPausa;
 
-    private final String[] opciones = {"Continuar", "Opciones", "Salir"};
+    private final String[] opciones = {"Continuar", "Opciones", "Tutorial", "Salir"};
     private int opcionSeleccionada = 0;
 
     private float tiempoParpadeo = 0;
@@ -118,6 +118,9 @@ public class PantallaPausa extends Pantalla {
                     juego.setScreen(new PantallaOpciones(juego,batch, this));
                     break;
                 case 2:
+                    juego.setScreen(new PantallaTutorial(juego,batch, this));
+                    break;
+                case 3:
                     Gdx.app.exit();
                     break;
             }
