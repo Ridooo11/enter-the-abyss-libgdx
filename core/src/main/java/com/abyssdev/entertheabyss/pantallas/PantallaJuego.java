@@ -31,6 +31,8 @@ public class PantallaJuego extends Pantalla {
     private Mapa mapaActual;
     private Sala salaActual;
     private ManejoEntradas inputProcessor;
+    private boolean jugadorCercaDeOgrini = false;
+    private static final float DISTANCIA_INTERACCION = 3f;
 
     // Transicion
     private boolean enTransicion = false;
@@ -211,6 +213,7 @@ public class PantallaJuego extends Pantalla {
         }
 
         jugador.update(delta, salaActual.getColisiones());
+        verificarProximidadOgrini();
         verificarTransiciones();
 
         if (enTransicion) {
@@ -230,6 +233,10 @@ public class PantallaJuego extends Pantalla {
                 }
             }
         }
+        if (jugadorCercaDeOgrini && Gdx.input.isKeyJustPressed(Input.Keys.T)) {
+            //Sonidos.pausarMusicaJuego(); // Pausar música del juego
+            juego.setScreen(new PantallaTienda(juego, batch, jugador,this));
+        }
 
         actualizarCamara();
 
@@ -239,6 +246,18 @@ public class PantallaJuego extends Pantalla {
             enemigo.renderizar(batch);
         }
         jugador.dibujar(batch);
+        //aca se puede elegir si mostrar un mensaje de tienda para el jugador
+        //otra idea es agregar un tutorial para que el jugador lea y sepa que
+        //cuando se acerca a ogrini puede comprar
+//        if (jugadorCercaDeOgrini) {
+//            // Dibujar texto indicador sobre el jugador
+//            com.badlogic.gdx.graphics.g2d.BitmapFont font = new com.badlogic.gdx.graphics.g2d.BitmapFont();
+//            font.getData().setScale(0.05f);
+//            font.setColor(com.badlogic.gdx.graphics.Color.YELLOW);
+//            font.draw(batch, "Presiona [T] para abrir tienda",
+//                jugador.getX() - 2f, jugador.getY() + jugador.getAlto() + 1f);
+//            font.dispose();
+//        }
         batch.end();
 
         if (hud != null) {
@@ -262,6 +281,61 @@ public class PantallaJuego extends Pantalla {
             if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
                 // ✅ Ahora se obtienen las habilidades del jugador
                 juego.setScreen(new PantallaArbolHabilidades(juego, batch, this, jugador, jugador.getHabilidades()));
+            }
+        }
+
+
+    }
+    private void verificarProximidadOgrini() {
+        jugadorCercaDeOgrini = false;
+
+        // Obtener los objetos de la capa de colisiones del mapa
+        if (salaActual == null || salaActual.getMapa() == null) {
+            return;
+        }
+
+        // Buscar la capa de objetos (en tu caso se llama "colisiones")
+        com.badlogic.gdx.maps.MapLayer capaObjetos = salaActual.getMapa().getLayers().get("colisiones");
+
+        if (capaObjetos == null) {
+            return;
+        }
+
+        // Revisar todos los objetos de la capa
+        com.badlogic.gdx.maps.MapObjects objetos = capaObjetos.getObjects();
+
+        for (com.badlogic.gdx.maps.MapObject objeto : objetos) {
+            // Solo procesar RectangleMapObject
+            if (!(objeto instanceof com.badlogic.gdx.maps.objects.RectangleMapObject)) {
+                continue;
+            }
+
+            // Verificar si tiene las propiedades "nombre" y "tipo"
+            String nombre = objeto.getProperties().get("nombre", String.class);
+            String tipo = objeto.getProperties().get("tipo", String.class);
+
+            if (nombre != null && nombre.equalsIgnoreCase("ogrini") &&
+                tipo != null && tipo.equalsIgnoreCase("tienda")) {
+
+                // Obtener el rectángulo y su posición
+                com.badlogic.gdx.maps.objects.RectangleMapObject rectObj =
+                    (com.badlogic.gdx.maps.objects.RectangleMapObject) objeto;
+                com.badlogic.gdx.math.Rectangle rect = rectObj.getRectangle();
+
+                // Convertir a coordenadas del mundo (dividir por TILE_SIZE)
+                float objX = (rect.x + rect.width / 2f) / 16f;  // Centro del rectángulo
+                float objY = (rect.y + rect.height / 2f) / 16f; // Centro del rectángulo
+
+                // Calcular distancia entre jugador y centro de Ogrini
+                float distancia = (float) Math.sqrt(
+                    Math.pow(jugador.getX() - objX, 2) +
+                        Math.pow(jugador.getY() - objY, 2)
+                );
+
+                if (distancia <= DISTANCIA_INTERACCION) {
+                    jugadorCercaDeOgrini = true;
+                    break;
+                }
             }
         }
     }
