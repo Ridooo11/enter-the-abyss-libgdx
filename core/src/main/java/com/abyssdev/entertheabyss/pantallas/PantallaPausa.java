@@ -79,7 +79,7 @@ public class PantallaPausa extends Pantalla {
             String texto = opciones[i];
             layout.setText(font, texto);
             float x = centerX - layout.width / 2f;
-            float y = centerY + (opciones.length - 1 - i) * 60 - 20;
+            float y = centerY + (opciones.length - 1 - i) * 60 - 60;
 
             if (i == opcionSeleccionada && mostrarColor) {
                 font.setColor(Color.YELLOW);
@@ -121,7 +121,7 @@ public class PantallaPausa extends Pantalla {
                     juego.setScreen(new PantallaTutorial(juego,batch, this));
                     break;
                 case 3:
-                    Gdx.app.exit();
+                    juego.setScreen(new MenuInicio(this.juego, this.batch));
                     break;
             }
         }

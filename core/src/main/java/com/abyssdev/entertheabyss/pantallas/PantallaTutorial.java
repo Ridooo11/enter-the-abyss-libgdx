@@ -45,7 +45,7 @@ public class PantallaTutorial extends Pantalla {
 
     @Override
     public void show() {
-        font = FontManager.getInstance().getMediana();
+        font = FontManager.getInstance().getPequena();
         fontTitulo = FontManager.getInstance().getGrande();
 
         camara = new OrthographicCamera();
@@ -63,14 +63,14 @@ public class PantallaTutorial extends Pantalla {
     private void cargarSlides() {
         // Define cuántos slides tenés
         slides = new Texture[] {
-            new Texture("tutoriales/movimiento.png"), // Movimiento
-            new Texture("tutoriales/combate.png"), // Ataque
-            new Texture("Tutoriales/ogrini.jpg"), // Tienda
-            new Texture("tutoriales/arbol.png"), // Habilidades
-            new Texture("Fondos/Win1.jpg")  // Objetivo
+            new Texture("tutoriales/movimiento.png"),
+            new Texture("tutoriales/combate.png"),
+            new Texture("Tutoriales/ogrini.jpg"),
+            new Texture("tutoriales/arbol.png"),
+            new Texture("Fondos/Win1.jpg")
         };
 
-        // Títulos para cada slide
+
         titulos = new String[] {
             "Movimiento",
             "Combate",
@@ -79,13 +79,13 @@ public class PantallaTutorial extends Pantalla {
             "Objetivo del Juego"
         };
 
-        // Descripciones para cada slide
+
         descripciones = new String[] {
             "Para moverte utiliza las teclas WSAD",
             "Presiona ESPACIO para atacar a los enemigos",
             "Presiona T cerca de Ogrini para comprar mejoras",
             "Presiona TAB para abrir el árbol de habilidades",
-            "Derrota enemigos, mejora tu personaje y conquista el abismo"
+            "Derrota enemigos y conquista el abismo"
         };
     }
 

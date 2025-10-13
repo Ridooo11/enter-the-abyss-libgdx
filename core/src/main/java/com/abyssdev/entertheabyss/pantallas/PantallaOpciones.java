@@ -1,12 +1,9 @@
 package com.abyssdev.entertheabyss.pantallas;
 
-import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.logica.OpcionesInputHandler;
-import com.abyssdev.entertheabyss.mapas.SpawnPoint;
 import com.abyssdev.entertheabyss.ui.FontManager;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.*;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -15,8 +12,8 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class PantallaOpciones extends Pantalla {
@@ -29,8 +26,7 @@ public class PantallaOpciones extends Pantalla {
     private OrthographicCamera camara;
     private ShapeRenderer shapeRenderer;
 
-    // Opciones
-    private int opcionSeleccionada = 0; // 0 = Música, 1 = Efectos, 2 = Volver
+    private int opcionSeleccionada = 0;
     private float volumenMusica;
     private float volumenEfectos;
 
@@ -46,14 +42,11 @@ public class PantallaOpciones extends Pantalla {
     private Rectangle sliderEfectosBounds;
     private Rectangle botonVolverBounds;
 
-    private boolean arrastandoSliderMusica = false;
-    private boolean arrastandoSliderEfectos = false;
-
     private static final float SLIDER_WIDTH = 300f;
     private static final float SLIDER_HEIGHT = 10f;
 
     public PantallaOpciones(Game juego, SpriteBatch batch, Pantalla pantallaAnterior) {
-        super(juego,batch);
+        super(juego, batch);
         this.pantallaAnterior = pantallaAnterior;
 
         sliderMusicaBounds = new Rectangle();
@@ -68,33 +61,33 @@ public class PantallaOpciones extends Pantalla {
         layout = new GlyphLayout();
 
         camara = new OrthographicCamera();
-        viewport = new FitViewport(640, 480, camara);
+        viewport = new ScreenViewport(camara);
         viewport.apply();
         camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
         camara.update();
 
         shapeRenderer = new ShapeRenderer();
 
-        // Cargar preferencias
+
         prefs = Gdx.app.getPreferences("EnterTheAbyss_Settings");
-       // this.volumenMusica = juego.getPreferencias().getFloat("volumenMusica", .2f);
-        //this.volumenEfectos = juego.getPreferencias().getFloat("volumenEfectos", .2f);
+        volumenMusica = prefs.getFloat("volumenMusica", 0.2f);
+        volumenEfectos = prefs.getFloat("volumenEfectos", 0.2f);
 
 
         Sonidos.setVolumenMusica(volumenMusica);
         Sonidos.setVolumenEfectos(volumenEfectos);
 
-        fondo = new Texture(Gdx.files.internal("Fondos/ImagenMenuInicio.PNG"));
+        fondo = new Texture(Gdx.files.internal("Fondos/fondoMenu.png"));
         fondo.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
         inputHandler = new OpcionesInputHandler(
-                this, // primero la pantalla actual
-                juego,
-                pantallaAnterior,
-                viewport,
-                sliderMusicaBounds,
-                sliderEfectosBounds,
-                botonVolverBounds
+            this,
+            juego,
+            pantallaAnterior,
+            viewport,
+            sliderMusicaBounds,
+            sliderEfectosBounds,
+            botonVolverBounds
         );
 
         Gdx.input.setInputProcessor(inputHandler);
@@ -120,10 +113,8 @@ public class PantallaOpciones extends Pantalla {
 
         batch.begin();
 
-        // Fondo oscurecido
-        batch.setColor(0.3f, 0.3f, 0.3f, 1f);
+
         batch.draw(fondo, 0, 0, ancho, alto);
-        batch.setColor(1, 1, 1, 1);
 
         // Título
         String titulo = "OPCIONES";
@@ -167,26 +158,27 @@ public class PantallaOpciones extends Pantalla {
         font.draw(batch, textoVolver, centerX - layout.width / 2f, yVolver);
 
         botonVolverBounds.set(
-                centerX - layout.width / 2f - 10,
-                yVolver - layout.height - 5,
-                layout.width + 20,
-                layout.height + 10
+            centerX - layout.width / 2f - 10,
+            yVolver - layout.height - 5,
+            layout.width + 20,
+            layout.height + 10
         );
 
         batch.end();
-
 
         shapeRenderer.setProjectionMatrix(camara.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         float sliderMusicaX = centerX - SLIDER_WIDTH / 2f;
         float sliderMusicaY = yMusica - 40;
-        dibujarSlider(sliderMusicaX, sliderMusicaY, volumenMusica, opcionSeleccionada == 0 || arrastandoSliderMusica);
+        dibujarSlider(sliderMusicaX, sliderMusicaY, volumenMusica,
+            opcionSeleccionada == 0 || inputHandler.isArrastandoSliderMusica());
         sliderMusicaBounds.set(sliderMusicaX, sliderMusicaY, SLIDER_WIDTH, SLIDER_HEIGHT);
 
         float sliderEfectosX = centerX - SLIDER_WIDTH / 2f;
         float sliderEfectosY = yEfectos - 40;
-        dibujarSlider(sliderEfectosX, sliderEfectosY, volumenEfectos, opcionSeleccionada == 1 || arrastandoSliderEfectos);
+        dibujarSlider(sliderEfectosX, sliderEfectosY, volumenEfectos,
+            opcionSeleccionada == 1 || inputHandler.isArrastandoSliderEfectos());
         sliderEfectosBounds.set(sliderEfectosX, sliderEfectosY, SLIDER_WIDTH, SLIDER_HEIGHT);
 
         shapeRenderer.end();
@@ -198,10 +190,8 @@ public class PantallaOpciones extends Pantalla {
     }
 
     private void dibujarSlider(float x, float y, float valor, boolean seleccionado) {
-
         shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1f);
         shapeRenderer.rect(x, y, SLIDER_WIDTH, SLIDER_HEIGHT);
-
 
         if (seleccionado) {
             shapeRenderer.setColor(1f, 0f, 0f, 1f);
@@ -209,7 +199,6 @@ public class PantallaOpciones extends Pantalla {
             shapeRenderer.setColor(0.8f, 0.8f, 0.8f, 1f);
         }
         shapeRenderer.rect(x, y, SLIDER_WIDTH * valor, SLIDER_HEIGHT);
-
 
         float indicadorX = x + SLIDER_WIDTH * valor;
         shapeRenderer.setColor(1f, 1f, 1f, 1f);
@@ -224,7 +213,6 @@ public class PantallaOpciones extends Pantalla {
     }
 
     private void manejarInputTeclado() {
-
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S)) {
             opcionSeleccionada = (opcionSeleccionada + 1) % 3;
             tiempoParpadeo = 0;
@@ -235,7 +223,6 @@ public class PantallaOpciones extends Pantalla {
             tiempoParpadeo = 0;
         }
 
-
         if (opcionSeleccionada == 0) {
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
                 volumenMusica = Math.max(0f, volumenMusica - 0.01f);
@@ -245,7 +232,7 @@ public class PantallaOpciones extends Pantalla {
                 volumenMusica = Math.min(1f, volumenMusica + 0.01f);
                 Sonidos.setVolumenMusica(volumenMusica);
             }
-        } else if (opcionSeleccionada == 1) { // Efectos
+        } else if (opcionSeleccionada == 1) {
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
                 volumenEfectos = Math.max(0f, volumenEfectos - 0.01f);
                 Sonidos.setVolumenEfectos(volumenEfectos);
@@ -255,7 +242,6 @@ public class PantallaOpciones extends Pantalla {
                 Sonidos.setVolumenEfectos(volumenEfectos);
             }
         }
-
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             if (opcionSeleccionada == 2) {
@@ -278,10 +264,12 @@ public class PantallaOpciones extends Pantalla {
 
     public void setVolumenMusica(float volumen) {
         this.volumenMusica = volumen;
+        Sonidos.setVolumenMusica(volumen);
     }
 
     public void setVolumenEfectos(float volumen) {
         this.volumenEfectos = volumen;
+        Sonidos.setVolumenEfectos(volumen);
     }
 
     public void setOpcionSeleccionada(int opcion) {
@@ -300,5 +288,4 @@ public class PantallaOpciones extends Pantalla {
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (fondo != null) fondo.dispose();
     }
-
 }

@@ -9,21 +9,18 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 
 import java.util.HashMap;
 
-/**
- * Gestor centralizado de fuentes del juego.
- * Carga y mantiene todas las fuentes en memoria para reutilizacion.
- */
+
 public class FontManager {
 
     private static FontManager instance;
 
-    // ✅ HashMap para almacenar fuentes por nombre
+
     private HashMap<String, BitmapFont> fuentes;
 
-    // ✅ Ruta de la fuente personalizada
-    private static final String RUTA_FUENTE = "fonts/tu_fuente.ttf";
 
-    // ✅ Flag para saber si se debe usar FreeType o fallback
+    private static final String RUTA_FUENTE = "fuentes/PixeloidSans.ttf";
+
+
     private boolean usarFreeType = true;
 
     private FontManager() {
@@ -31,9 +28,7 @@ public class FontManager {
         cargarFuentes();
     }
 
-    /**
-     * Obtiene la instancia única del FontManager (Singleton)
-     */
+
     public static FontManager getInstance() {
         if (instance == null) {
             instance = new FontManager();
@@ -41,9 +36,7 @@ public class FontManager {
         return instance;
     }
 
-    /**
-     * Carga todas las fuentes necesarias del juego
-     */
+
     private void cargarFuentes() {
         try {
             cargarConFreeType();
@@ -62,7 +55,7 @@ public class FontManager {
             Gdx.files.internal(RUTA_FUENTE)
         );
 
-        // ✅ FUENTE TÍTULO GRANDE (para títulos principales)
+        // FUENTE TÍTULO GRANDE (para títulos principales)
         FreeTypeFontParameter paramTitulo = new FreeTypeFontParameter();
         paramTitulo.size = 72;
         paramTitulo.color = Color.WHITE;
@@ -75,7 +68,7 @@ public class FontManager {
         paramTitulo.magFilter = Texture.TextureFilter.Linear;
         fuentes.put("titulo", generator.generateFont(paramTitulo));
 
-        // ✅ FUENTE GRANDE (para subtítulos, opciones de menú)
+        // FUENTE GRANDE (para subtítulos, opciones de menú)
         FreeTypeFontParameter paramGrande = new FreeTypeFontParameter();
         paramGrande.size = 48;
         paramGrande.color = Color.WHITE;
@@ -88,7 +81,7 @@ public class FontManager {
         paramGrande.magFilter = Texture.TextureFilter.Linear;
         fuentes.put("grande", generator.generateFont(paramGrande));
 
-        // ✅ FUENTE MEDIANA (para texto general, diálogos)
+        // FUENTE MEDIANA (para texto general, diálogos)
         FreeTypeFontParameter paramMediana = new FreeTypeFontParameter();
         paramMediana.size = 32;
         paramMediana.color = Color.WHITE;
@@ -101,7 +94,7 @@ public class FontManager {
         paramMediana.magFilter = Texture.TextureFilter.Linear;
         fuentes.put("mediana", generator.generateFont(paramMediana));
 
-        // ✅ FUENTE PEQUEÑA (para HUD, stats, números)
+        // FUENTE PEQUEÑA (para HUD, stats, números)
         FreeTypeFontParameter paramPequena = new FreeTypeFontParameter();
         paramPequena.size = 24;
         paramPequena.color = Color.WHITE;
@@ -111,7 +104,7 @@ public class FontManager {
         paramPequena.magFilter = Texture.TextureFilter.Linear;
         fuentes.put("pequena", generator.generateFont(paramPequena));
 
-        // ✅ FUENTE PEQUEÑA SIN BORDE (para texto secundario)
+        // FUENTE PEQUEÑA SIN BORDE (para texto secundario)
         FreeTypeFontParameter paramPequenaSinBorde = new FreeTypeFontParameter();
         paramPequenaSinBorde.size = 20;
         paramPequenaSinBorde.color = Color.WHITE;
@@ -119,7 +112,7 @@ public class FontManager {
         paramPequenaSinBorde.magFilter = Texture.TextureFilter.Linear;
         fuentes.put("pequena_sin_borde", generator.generateFont(paramPequenaSinBorde));
 
-        // ✅ FUENTE PARA DAÑO/NÚMEROS (amarilla, más gruesa)
+        // FUENTE PARA DAÑO/NÚMEROS (amarilla, más gruesa)
         FreeTypeFontParameter paramDanio = new FreeTypeFontParameter();
         paramDanio.size = 36;
         paramDanio.color = Color.YELLOW;
