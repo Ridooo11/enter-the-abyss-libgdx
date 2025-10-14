@@ -1,11 +1,12 @@
 package com.abyssdev.entertheabyss.pantallas;
 
-import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.mapas.Mapa;
 import com.abyssdev.entertheabyss.mapas.Sala;
 import com.abyssdev.entertheabyss.mapas.SpawnPoint;
 import com.abyssdev.entertheabyss.mapas.ZonaTransicion;
 import com.abyssdev.entertheabyss.logica.ManejoEntradas;
+import com.abyssdev.entertheabyss.personajes.Accion;
+import com.abyssdev.entertheabyss.personajes.Boss;
 import com.abyssdev.entertheabyss.personajes.Enemigo;
 import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.abyssdev.entertheabyss.ui.Hud;
@@ -16,7 +17,6 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.abyssdev.entertheabyss.ui.Sonidos;
@@ -57,9 +57,9 @@ public class PantallaJuego extends Pantalla {
             mapaActual = new Mapa("mazmorra1");
             mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx",1));
             mapaActual.agregarSala(new Sala("sala2", "maps/mapa1_sala2.tmx",1));
-            mapaActual.agregarSala(new Sala("sala3", "maps/mapa2_posible.tmx",1));
+            mapaActual.agregarSala(new Sala("sala5", "maps/mapa2_posible.tmx",15));
             mapaActual.agregarSala(new Sala("sala4", "maps/mapa1_sala4.tmx",1));
-            mapaActual.agregarSala(new Sala("sala5", "maps/mapa1_sala5.tmx",15));
+            mapaActual.agregarSala(new Sala("sala3", "maps/mapa1_sala5.tmx",1));
 
             camara = new OrthographicCamera();
             viewport = new FitViewport(32, 32 * (9f / 16f), camara);
@@ -194,7 +194,7 @@ public class PantallaJuego extends Pantalla {
                 }
 
                 if (enemigo.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos)) {
-                    jugador.recibirDanio(10);
+                    jugador.recibirDanio(Accion.ATAQUE.getDanioBruto(false));
                     if (jugador.getVida() <= 0) {
                         juego.setScreen(new PantallaGameOver(juego,batch));
                         return;
@@ -208,6 +208,36 @@ public class PantallaJuego extends Pantalla {
                     if (!enemigo.debeEliminarse() && jugador.getHitboxAtaque().overlaps(enemigo.getRectangulo())) {
                         enemigo.recibirDanio(jugador.getDanio());
                     }
+                }
+            }
+        }
+        if (salaActual.getId().equalsIgnoreCase("sala5")) {
+            if (salaActual.getBoss() == null) {
+                salaActual.generarBoss();
+            }
+
+            Boss boss = salaActual.getBoss();
+            if (boss != null && !boss.debeEliminarse()) {
+                // Actualizar el Boss
+                if (boss.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos != null ? enemigos : new ArrayList<>())) {
+                    jugador.recibirDanio(Accion.ATAQUE.getDanioBruto(true));
+                    if (jugador.getVida() <= 0) {
+                        juego.setScreen(new PantallaGameOver(juego, batch));
+                        return;
+                    }
+                }
+
+                // Comprobar ataque del jugador al Boss
+                if (jugador.getHitboxAtaque().getWidth() > 0) {
+                    if (jugador.getHitboxAtaque().overlaps(boss.getRectangulo())) {
+                        boss.recibirDanio(jugador.getDanio());
+                    }
+                }
+
+                // Si el Boss muere
+                if (boss.debeEliminarse()) {
+                    jugador.modificarMonedas(50);
+                    System.out.println("✅ ¡JEFE DERROTADO! Jugador recibe 50 monedas.");
                 }
             }
         }
@@ -244,6 +274,10 @@ public class PantallaJuego extends Pantalla {
         batch.begin();
         for (Enemigo enemigo : salaActual.getEnemigos()) {
             enemigo.renderizar(batch);
+        }
+       Boss boss = salaActual.getBoss();
+        if (boss != null) {
+            boss.renderizar(batch);
         }
         jugador.dibujar(batch);
         //aca se puede elegir si mostrar un mensaje de tienda para el jugador

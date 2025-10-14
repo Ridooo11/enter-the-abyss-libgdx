@@ -1,5 +1,6 @@
 package com.abyssdev.entertheabyss.mapas;
 
+import com.abyssdev.entertheabyss.personajes.Boss;
 import com.abyssdev.entertheabyss.personajes.Enemigo;
 import com.badlogic.gdx.maps.objects.PointMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -24,6 +25,8 @@ public class Sala {
     private Array<Rectangle> colisiones;
     private Array<ZonaTransicion> zonasTransicion;
     private ArrayList<Enemigo> enemigos;
+    private Boss bossFinal;
+    private boolean bossGenerado = false;
     private Array<SpawnPoint> spawnPoints;
     private int cantidadEnemigos;
     private boolean enemigosGenerados = false;
@@ -111,6 +114,12 @@ public class Sala {
             }, delay * 1.5f);
         }
     }
+    public void generarBoss() {
+        float x = MathUtils.random(2f, getAnchoMundo() - 2f);
+        float y = MathUtils.random(2f, getAltoMundo() - 2f);
+        bossFinal = new Boss(x , y);
+
+    }
 
     private void cargarSpawnPoints() {
         spawnPoints = new Array<>();
@@ -141,17 +150,20 @@ public class Sala {
     }
 
     // GETTERS
-    public String getId() { return id; }
-    public TiledMap getMapa() { return mapa; }
-    public OrthogonalTiledMapRenderer getRenderer() { return renderer; }
-    public Array<Rectangle> getColisiones() { return colisiones; }
-    public Array<ZonaTransicion> getZonasTransicion() { return zonasTransicion; }
-    public ArrayList<Enemigo> getEnemigos() { return enemigos; }
-    public float getAnchoMundo() { return anchoTiles; }
-    public float getAltoMundo() { return altoTiles; }
+    public String getId() { return this.id; }
+    public TiledMap getMapa() { return this.mapa; }
+    public OrthogonalTiledMapRenderer getRenderer() { return this.renderer; }
+    public Array<Rectangle> getColisiones() { return this.colisiones; }
+    public Array<ZonaTransicion> getZonasTransicion() { return this.zonasTransicion; }
+    public ArrayList<Enemigo> getEnemigos() { return this.enemigos; }
+    public float getAnchoMundo() { return this.anchoTiles; }
+    public float getAltoMundo() { return this.altoTiles; }
     public Array<SpawnPoint> getSpawnPoints() {
-        return spawnPoints;
+        return this.spawnPoints;
     }
+    public Boss getBoss() {return this.bossFinal;}
+    public void setBoss(Boss boss) {this.bossFinal = boss;}
+    public boolean getBossGenerado(){return this.bossGenerado;}
 
     public void dispose() {
         if (mapa != null) mapa.dispose();

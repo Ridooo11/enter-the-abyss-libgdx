@@ -11,37 +11,33 @@ import java.util.ArrayList;
 
 public class Enemigo {
 
-    public enum Estado {
-        IDLE, CAMINAR, ATAQUE, HIT, MUERTO
-    }
-
-    private static final float VELOCIDAD = 3f;
+  //  private static final float VELOCIDAD = 3f;
     private static final float TAMANO = 3f;
     private static final float DISTANCIA_ATAQUE = 0.8f;
-    private static final float COOLDOWN_ATAQUE = 4f;
+   // private static final float COOLDOWN_ATAQUE = 4f;
     private static final float COOLDOWN_GOLPE = 0.1f;
 
-    private float tiempoDesdeUltimoAtaque = 0;
-    private float tiempoDesdeUltimoGolpe = 0f;
+    protected float tiempoDesdeUltimoAtaque = 0;
+    protected float tiempoDesdeUltimoGolpe = 0f;
 
-    private Texture hojaSprite;
-    private Vector2 posicion;
-    private Vector2 velocidad;
-    private Accion estado;
-    private float tiempoEstado;
+    protected Texture hojaSprite;
+    protected Vector2 posicion;
+    protected Vector2 velocidad;
+    protected Accion estado;
+    protected float tiempoEstado;
 
-    private Animation<TextureRegion> animIdle;
-    private Animation<TextureRegion> animCaminar;
-    private Animation<TextureRegion> animAtacar;
-    private Animation<TextureRegion> animHit;
-    private Animation<TextureRegion> animMuerte;
+    protected Animation<TextureRegion> animIdle;
+    protected Animation<TextureRegion> animCaminar;
+    protected Animation<TextureRegion> animAtacar;
+    protected Animation<TextureRegion> animHit;
+    protected Animation<TextureRegion> animMuerte;
 
-    private boolean eliminar;
-    private boolean haciaIzquierda;
+    protected boolean eliminar;
+    protected boolean haciaIzquierda;
 
     // 🔹 Sistema de vida en lugar de golpes
-    private int vida = 30;
-    private int vidaMaxima = 30;
+    protected int vida = 30;
+    protected int vidaMaxima = 30;
 
     public Enemigo(float x, float y) {
         hojaSprite = new Texture("personajes/esqueletoEnemigo.png");
@@ -56,16 +52,16 @@ public class Enemigo {
         cargarAnimaciones();
     }
 
-    private void cargarAnimaciones() {
+    protected void cargarAnimaciones() {
         TextureRegion[][] regiones = TextureRegion.split(hojaSprite, 64, 64);
-        animAtacar = crearAnimacion(regiones[0], 13, 0.07f, Animation.PlayMode.LOOP);
-        animMuerte = crearAnimacion(regiones[1], 13, 0.1f, Animation.PlayMode.NORMAL);
-        animCaminar = crearAnimacion(regiones[2], 12, 0.1f, Animation.PlayMode.LOOP);
-        animIdle = crearAnimacion(regiones[3], 4, 0.2f, Animation.PlayMode.LOOP);
-        animHit = crearAnimacion(regiones[4], 3, 0.1f, Animation.PlayMode.NORMAL);
+        this.animAtacar = crearAnimacion(regiones[0], 13, 0.07f, Animation.PlayMode.LOOP);
+        this.animMuerte = crearAnimacion(regiones[1], 13, 0.1f, Animation.PlayMode.NORMAL);
+        this.animCaminar = crearAnimacion(regiones[2], 12, 0.1f, Animation.PlayMode.LOOP);
+        this.animIdle = crearAnimacion(regiones[3], 4, 0.2f, Animation.PlayMode.LOOP);
+        this.animHit = crearAnimacion(regiones[4], 3, 0.1f, Animation.PlayMode.NORMAL);
     }
 
-    private Animation<TextureRegion> crearAnimacion(TextureRegion[] frames, int cantidad, float duracion, Animation.PlayMode modo) {
+    Animation<TextureRegion> crearAnimacion(TextureRegion[] frames, int cantidad, float duracion, Animation.PlayMode modo) {
         TextureRegion[] usados = new TextureRegion[cantidad];
         System.arraycopy(frames, 0, usados, 0, cantidad);
         Animation<TextureRegion> anim = new Animation<>(duracion, usados);
@@ -93,7 +89,7 @@ public class Enemigo {
 
             if (distancia < DISTANCIA_ATAQUE) {
                 velocidad.setZero();
-                if (tiempoDesdeUltimoAtaque >= COOLDOWN_ATAQUE) {
+                if (tiempoDesdeUltimoAtaque >= Accion.ATAQUE.getColdown()) {
                     cambiarEstado(Accion.ATAQUE);
                     tiempoDesdeUltimoAtaque = 0;
                     Gdx.app.log("Enemigo", "¡Jugador ha sido atacado!");
@@ -102,7 +98,7 @@ public class Enemigo {
             } else {
                 cambiarEstado(Accion.CAMINAR);
                 direccion.nor();
-                velocidad.set(direccion.scl(VELOCIDAD));
+                velocidad.set(direccion.scl(TipoEnemigoVelocidad.ENEMIGO.getVelocidad()));
                 haciaIzquierda = velocidad.x < 0;
 
                 Vector2 nuevaPos = new Vector2(posicion).add(velocidad.x * delta, velocidad.y * delta);
@@ -186,7 +182,7 @@ public class Enemigo {
         cambiarEstado(Accion.MUERTE);
     }
 
-    private void cambiarEstado(Accion nuevo) {
+    protected void cambiarEstado(Accion nuevo) {
         if (estado != nuevo) {
             estado = nuevo;
             tiempoEstado = 0;

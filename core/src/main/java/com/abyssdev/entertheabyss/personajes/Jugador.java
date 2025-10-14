@@ -444,12 +444,12 @@ public class Jugador {
     public int getMunicionMaxima() { return this.municionMaxima; }
     public int getMonedas() { return this.monedas; }
     public int getDanio() { return this.danioBase; }
-    public float getX() { return posicion.x; }
-    public float getY() { return posicion.y; }
-    public Vector2 getPosicion() { return posicion; }
+    public float getX() { return this.posicion.x; }
+    public float getY() { return this.posicion.y; }
+    public Vector2 getPosicion() { return this.posicion; }
     public float getAncho() { return this.ancho; }
     public float getAlto() { return this.alto; }
-    public Rectangle getHitboxAtaque() { return hitboxAtaque; }
+    public Rectangle getHitboxAtaque() { return this.hitboxAtaque; }
 
 
     // --- SETTERS ---
