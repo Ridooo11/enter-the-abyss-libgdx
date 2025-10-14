@@ -31,6 +31,10 @@ public class ManejoEntradas implements InputProcessor {
             case Input.Keys.SPACE:
                 jugador.atacar(); // Llama al método atacar() del jugador
                 break;
+            case Input.Keys.SHIFT_LEFT:
+            case Input.Keys.SHIFT_RIGHT:
+                jugador.intentarEvasion();
+                break;
         }
         return true; // Indica que el evento ha sido manejado
     }

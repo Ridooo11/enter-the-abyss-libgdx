@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.Color;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +60,20 @@ public class Jugador {
     private float tiempoRegeneracion = 0f;
     private float intervaloRegeneracion = 1f; // Cada 1 segundo
     private int cantidadRegeneracion = 1;
+
+    // --- DASH / EVASIÓN ---
+    private boolean evasionHabilitada = false;
+    private boolean estaEvadendo = false;
+    private float duracionEvasion = 0.3f; // dura 0.3 segundos
+    private float tiempoEvasion = 0f;
+    private float cooldownEvasion = 1.5f; // tiempo antes de poder volver a usar
+    private float tiempoDesdeUltimaEvasion = 0f;
+    private float velocidadBase = 3.2f;
+
+    private float parpadeoEvasion = 0f; // tiempo acumulado para parpadeo
+    private float intervaloParpadeo = 0.05f; // cambia cada 0.05s la visibilidad
+    private boolean mostrarFrame = true; // si dibujar o no
+
 
     // 🔹 HABILIDADES DEL JUGADOR
     private Map<String, Habilidad> habilidades;
@@ -258,6 +273,19 @@ public class Jugador {
                 Gdx.app.log("Jugador", "Regenerando vida... (" + vida + "/" + vidaMaxima + ")");
             }
         }
+
+        // --- EVASIÓN (DASH) ---
+        if (estaEvadendo) {
+            tiempoEvasion += delta;
+            if (tiempoEvasion >= duracionEvasion) {
+                estaEvadendo = false;
+                velocidad = velocidadBase; // volver a velocidad normal
+                mostrarFrame = true; // asegurarse que el personaje se dibuje normalmente
+                parpadeoEvasion = 0f;
+            }
+        } else {
+            tiempoDesdeUltimaEvasion += delta;
+        }
     }
 
 
@@ -279,7 +307,21 @@ public class Jugador {
             frameParaDibujar.flip(true, false);
         }
 
-        batch.draw(frameParaDibujar, posicion.x, posicion.y, ancho, alto);
+        // --- EFECTO DASH ---
+        if (estaEvadendo) {
+            parpadeoEvasion += Gdx.graphics.getDeltaTime();
+            if (parpadeoEvasion >= intervaloParpadeo) {
+                mostrarFrame = !mostrarFrame;
+                parpadeoEvasion = 0f;
+            }
+            if (mostrarFrame) {
+                batch.setColor(1f, 1f, 1f, 0.5f); // 50% transparencia
+                batch.draw(frameParaDibujar, posicion.x, posicion.y, ancho, alto);
+                batch.setColor(Color.WHITE); // volver a normal
+            }
+        } else {
+            batch.draw(frameParaDibujar, posicion.x, posicion.y, ancho, alto);
+        }
     }
 
     private void actualizarHitboxAtaque() {
@@ -347,8 +389,10 @@ public class Jugador {
     }
 
     public void habilitarEvasion(boolean b) {
-        // Implementar si se necesita
+        this.evasionHabilitada = b;
+        Gdx.app.log("Jugador", "Evasión " + (b ? "habilitada" : "deshabilitada"));
     }
+
 
     public float getVelocidad() {
         return this.velocidad;
@@ -373,6 +417,25 @@ public class Jugador {
         Gdx.app.log("Jugador", "Regeneración activada: +" + cantidadPorSegundo + " por segundo");
     }
 
+    public void intentarEvasion() {
+        if (!evasionHabilitada) return;
+        if (estaEvadendo) return;
+        if (tiempoDesdeUltimaEvasion < cooldownEvasion) return;
+
+        estaEvadendo = true;
+        tiempoEvasion = 0f;
+        tiempoDesdeUltimaEvasion = 0f;
+
+        // Aumenta temporalmente la velocidad
+        velocidad = velocidadBase * 4f;
+
+        // Reproducir sonido opcional
+        Sonidos.reproducirEvasion(); // solo si querés agregarlo
+
+        Gdx.app.log("Jugador", "¡Evasión activada!");
+    }
+
+
 
     // --- GETTERS ---
     public int getVida() { return this.vida; }
@@ -387,6 +450,7 @@ public class Jugador {
     public float getAncho() { return this.ancho; }
     public float getAlto() { return this.alto; }
     public Rectangle getHitboxAtaque() { return hitboxAtaque; }
+
 
     // --- SETTERS ---
     public void setVida(int vida) {

@@ -15,6 +15,7 @@ public class Sonidos {
     private static Sound sonidoAtaque;
     private static Sound compraExitosa;
     private static Sound compraFallida;
+    private static Sound sonidoEvasion;
 
     public static void cargar() {
         // Música
@@ -35,13 +36,14 @@ public class Sonidos {
         sonidoAtaque = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/espada.mp3"));
         compraExitosa = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/compra_exitosa.mp3"));
         compraFallida = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/compra_fallida.mp3"));
+        sonidoEvasion = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/dash.mp3"));
 
     }
 
     // ✅ Efectos
     public static void reproducirAtaque() {
         if (sonidoAtaque != null) {
-            sonidoAtaque.play(0.8f);
+            sonidoAtaque.play(volumenMusica);
         }
     }
 
@@ -51,6 +53,10 @@ public class Sonidos {
 
     public static void reproducirCompraFallida() {
         compraFallida.play(1.0f);
+    }
+
+    public static void reproducirEvasion() {
+        if (sonidoEvasion != null) sonidoEvasion.play(5f);
     }
 
     private static float volumenMusica = 0.5f;

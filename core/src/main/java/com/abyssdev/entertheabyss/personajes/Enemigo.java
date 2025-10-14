@@ -27,7 +27,7 @@ public class Enemigo {
     private Texture hojaSprite;
     private Vector2 posicion;
     private Vector2 velocidad;
-    private Estado estado;
+    private Accion estado;
     private float tiempoEstado;
 
     private Animation<TextureRegion> animIdle;
@@ -47,7 +47,7 @@ public class Enemigo {
         hojaSprite = new Texture("personajes/esqueletoEnemigo.png");
         posicion = new Vector2(x, y);
         velocidad = new Vector2(0, 0);
-        estado = Estado.IDLE;
+        estado = Accion.ESTATICO;
         tiempoEstado = 0;
         eliminar = false;
         haciaIzquierda = false;
@@ -78,29 +78,29 @@ public class Enemigo {
         tiempoDesdeUltimoAtaque += delta;
         tiempoDesdeUltimoGolpe += delta;
 
-        if (estado == Estado.MUERTO && animMuerte.isAnimationFinished(tiempoEstado)) {
+        if (estado == Accion.MUERTE && animMuerte.isAnimationFinished(tiempoEstado)) {
             eliminar = true;
             return false;
         }
 
-        if (estado == Estado.HIT && animHit.isAnimationFinished(tiempoEstado)) {
-            cambiarEstado(Estado.IDLE);
+        if (estado == Accion.HIT && animHit.isAnimationFinished(tiempoEstado)) {
+            cambiarEstado(Accion.ESTATICO);
         }
 
-        if (estado != Estado.HIT && estado != Estado.MUERTO) {
+        if (estado != Accion.HIT && estado != Accion.MUERTE) {
             Vector2 direccion = new Vector2(posicionJugador).sub(posicion);
             float distancia = direccion.len();
 
             if (distancia < DISTANCIA_ATAQUE) {
                 velocidad.setZero();
                 if (tiempoDesdeUltimoAtaque >= COOLDOWN_ATAQUE) {
-                    cambiarEstado(Estado.ATAQUE);
+                    cambiarEstado(Accion.ATAQUE);
                     tiempoDesdeUltimoAtaque = 0;
                     Gdx.app.log("Enemigo", "¡Jugador ha sido atacado!");
                     return true;
                 }
             } else {
-                cambiarEstado(Estado.CAMINAR);
+                cambiarEstado(Accion.CAMINAR);
                 direccion.nor();
                 velocidad.set(direccion.scl(VELOCIDAD));
                 haciaIzquierda = velocidad.x < 0;
@@ -124,10 +124,10 @@ public class Enemigo {
                     }
                 }
                 if (!colisiona) {
-                    cambiarEstado(Estado.CAMINAR);
+                    cambiarEstado(Accion.CAMINAR);
                     posicion.set(nuevaPos);
                 } else {
-                    cambiarEstado(Estado.IDLE);
+                    cambiarEstado(Accion.ESTATICO);
                     velocidad.setZero();
                 }
             }
@@ -159,9 +159,9 @@ public class Enemigo {
                 return animAtacar.getKeyFrame(tiempoEstado);
             case HIT:
                 return animHit.getKeyFrame(tiempoEstado);
-            case MUERTO:
+            case MUERTE:
                 return animMuerte.getKeyFrame(tiempoEstado);
-            case IDLE:
+            case ESTATICO:
             default:
                 return animIdle.getKeyFrame(tiempoEstado);
         }
@@ -169,12 +169,12 @@ public class Enemigo {
 
     // 🔹 Recibe daño real en lugar de contar golpes
     public void recibirDanio(int danio) {
-        if (tiempoDesdeUltimoGolpe < COOLDOWN_GOLPE || estado == Estado.MUERTO) return;
+        if (tiempoDesdeUltimoGolpe < COOLDOWN_GOLPE || estado == Accion.MUERTE) return;
 
         this.vida -= danio;
         Gdx.app.log("Enemigo", "Recibió " + danio + " de daño. Vida restante: " + this.vida);
 
-        cambiarEstado(Estado.HIT);
+        cambiarEstado(Accion.HIT);
         tiempoDesdeUltimoGolpe = 0f;
 
         if (this.vida <= 0) {
@@ -183,14 +183,14 @@ public class Enemigo {
     }
 
     public void morir() {
-        cambiarEstado(Estado.MUERTO);
+        cambiarEstado(Accion.MUERTE);
     }
 
-    private void cambiarEstado(Estado nuevo) {
+    private void cambiarEstado(Accion nuevo) {
         if (estado != nuevo) {
             estado = nuevo;
             tiempoEstado = 0;
-            if (nuevo != Estado.CAMINAR) {
+            if (nuevo != Accion.CAMINAR) {
                 velocidad.setZero();
             }
         }
