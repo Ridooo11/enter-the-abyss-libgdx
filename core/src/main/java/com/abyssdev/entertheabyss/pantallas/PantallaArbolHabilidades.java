@@ -386,7 +386,9 @@ public class PantallaArbolHabilidades extends Pantalla {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+
             juego.setScreen(pantallaJuego);
+            Sonidos.reanudarMusicaJuego();
         }
     }
 

@@ -96,36 +96,60 @@ public class Enemigo {
                     return true;
                 }
             } else {
-                cambiarEstado(Accion.CAMINAR);
-                direccion.nor();
-                velocidad.set(direccion.scl(TipoEnemigoVelocidad.ENEMIGO.getVelocidad()));
-                haciaIzquierda = velocidad.x < 0;
-
-                Vector2 nuevaPos = new Vector2(posicion).add(velocidad.x * delta, velocidad.y * delta);
-                Rectangle rectNuevo = new Rectangle(nuevaPos.x, nuevaPos.y, TAMANO, TAMANO);
-
-                boolean colisiona = false;
-                for (Rectangle r : colisionesMapa) {
-                    if (rectNuevo.overlaps(r)) {
-                        colisiona = true;
-                        break;
-                    }
-                }
-                if (!colisiona) {
-                    for (Enemigo otro : otrosEnemigos) {
-                        if (otro != this && rectNuevo.overlaps(otro.getRectangulo())) {
-                            colisiona = true;
-                            break;
-                        }
-                    }
-                }
-                if (!colisiona) {
-                    cambiarEstado(Accion.CAMINAR);
-                    posicion.set(nuevaPos);
+                // Calcular dirección normalizada y velocidad
+                if (direccion.len() > 0.1f) {
+                    direccion.nor();
+                    float velocidadBase = 3f;
+                    velocidad.set(direccion.x * velocidadBase, direccion.y * velocidadBase);
                 } else {
-                    cambiarEstado(Accion.ESTATICO);
                     velocidad.setZero();
                 }
+
+                haciaIzquierda = velocidad.x < 0;
+
+                // Guardar posición actual
+                Vector2 posAnterior = new Vector2(posicion);
+
+                // Intentar moverse paso a paso
+                boolean movioX = false, movioY = false;
+
+                // Mover en X
+                posicion.x += velocidad.x * delta;
+                if (hayColision(getRectangulo(), colisionesMapa, otrosEnemigos)) {
+                    posicion.x = posAnterior.x; // Retroceder si hay colisión
+                    velocidad.x = 0;
+                } else {
+                    movioX = true;
+                }
+
+                // Mover en Y
+                posicion.y += velocidad.y * delta;
+                if (hayColision(getRectangulo(), colisionesMapa, otrosEnemigos)) {
+                    posicion.y = posAnterior.y; // Retroceder si hay colisión
+                    velocidad.y = 0;
+                } else {
+                    movioY = true;
+                }
+
+                if (movioX || movioY) {
+                    cambiarEstado(Accion.CAMINAR);
+                } else {
+                    cambiarEstado(Accion.ESTATICO);
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hayColision(Rectangle rect, Array<Rectangle> colisionesMapa, ArrayList<Enemigo> otrosEnemigos) {
+        for (Rectangle r : colisionesMapa) {
+            if (rect.overlaps(r)) {
+                return true;
+            }
+        }
+        for (Enemigo otro : otrosEnemigos) {
+            if (otro != this && rect.overlaps(otro.getRectangulo())) {
+                return true;
             }
         }
         return false;
@@ -138,13 +162,16 @@ public class Enemigo {
         float drawX = posicion.x;
         float drawY = posicion.y;
 
-        if (haciaIzquierda && !frame.isFlipX()) {
-            frame.flip(true, false);
-        } else if (!haciaIzquierda && frame.isFlipX()) {
-            frame.flip(true, false);
+        // 🔁 Crea una copia del frame para evitar modificar el original
+        TextureRegion frameRender = new TextureRegion(frame);
+
+        if (haciaIzquierda && !frameRender.isFlipX()) {
+            frameRender.flip(true, false);
+        } else if (!haciaIzquierda && frameRender.isFlipX()) {
+            frameRender.flip(true, false);
         }
 
-        batch.draw(frame, drawX, drawY, width, height);
+        batch.draw(frameRender, drawX, drawY, width, height);
     }
 
     private TextureRegion obtenerFrameActual() {
@@ -211,5 +238,9 @@ public class Enemigo {
 
     public int getVidaMaxima() {
         return this.vidaMaxima;
+    }
+
+    public static float getTamaño() {
+        return TAMANO;
     }
 }

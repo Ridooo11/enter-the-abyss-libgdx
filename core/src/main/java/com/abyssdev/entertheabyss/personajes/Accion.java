@@ -4,7 +4,7 @@ public enum Accion {
 
     ESTATICO(false,0f, false,0),
     CAMINAR(true, 0f, false,0),
-    ATAQUE(false, 4f, true,10),
+    ATAQUE(false, 2f, true,10),
     HIT(false,0f, false,0),
     MUERTE(false,0f, false,0);
 

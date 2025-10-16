@@ -128,6 +128,7 @@ public class PantallaTienda extends Pantalla {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             juego.setScreen(pantallaJuego);
+            Sonidos.reanudarMusicaJuego();
         }
     }
 

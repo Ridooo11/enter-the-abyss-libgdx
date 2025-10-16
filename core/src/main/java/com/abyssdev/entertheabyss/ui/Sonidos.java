@@ -120,6 +120,17 @@ public class Sonidos {
         musicaDerrota.play();
     }
 
+    public static void pausarMusicaJuego() {
+        if (musicaJuego != null && musicaJuego.isPlaying()) {
+            musicaJuego.pause();
+        }
+    }
+
+    public static void reanudarMusicaJuego() {
+        if (musicaJuego != null && !musicaJuego.isPlaying()) {
+            musicaJuego.play();
+        }
+    }
 
     public static void detenerTodaMusica() {
         musicaMenu.stop();

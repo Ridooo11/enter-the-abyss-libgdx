@@ -56,7 +56,7 @@ public class PantallaJuego extends Pantalla {
         if (!yaInicializado) {
             jugador = new Jugador();
             mapaActual = new Mapa("mazmorra1");
-            mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx",1));
+            mapaActual.agregarSala(new Sala("sala1", "maps/mapa1_sala1.tmx",5));
             mapaActual.agregarSala(new Sala("sala2", "maps/mapa1_sala2.tmx",1));
             mapaActual.agregarSala(new Sala("sala5", "maps/mapa2_posible.tmx",15));
             mapaActual.agregarSala(new Sala("sala4", "maps/mapa1_sala4.tmx",1));
@@ -73,7 +73,7 @@ public class PantallaJuego extends Pantalla {
             actualizarCamara();
         }
         Gdx.input.setInputProcessor(inputProcessor);
-        Sonidos.reproducirMusicaJuego();
+        //Sonidos.reproducirMusicaJuego();
     }
 
     private void cambiarSala(String destinoId) {
@@ -276,7 +276,7 @@ public class PantallaJuego extends Pantalla {
             }
         }
         if (jugadorCercaDeOgrini && Gdx.input.isKeyJustPressed(Input.Keys.T)) {
-            //Sonidos.pausarMusicaJuego(); // Pausar música del juego
+            Sonidos.pausarMusicaJuego(); // Pausar música del juego
             juego.setScreen(new PantallaTienda(juego, batch, jugador,this));
         }
 
@@ -324,6 +324,7 @@ public class PantallaJuego extends Pantalla {
                 juego.setScreen(new PantallaPausa(juego,batch, this));
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+                Sonidos.pausarMusicaJuego();
                 // ✅ Ahora se obtienen las habilidades del jugador
                 juego.setScreen(new PantallaArbolHabilidades(juego, batch, this, jugador, jugador.getHabilidades()));
             }
