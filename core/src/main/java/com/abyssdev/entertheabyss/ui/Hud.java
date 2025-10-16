@@ -17,7 +17,7 @@ public class Hud {
     private Texture moneda;
     private BitmapFont font;
     private GlyphLayout layout;
-    private Viewport viewport; // ✅ Añadir viewport
+    private Viewport viewport; // Añadir viewport
 
     private float heartWidth = 32f;
     private float heartHeight = 32f;
@@ -34,14 +34,11 @@ public class Hud {
         this.heart50 = new Texture("imagenes/corazon50%.png");
         this.heart25 = new Texture("imagenes/corazon25%.png");
         this.moneda = new Texture("imagenes/moneda.png");
-        this.font = new BitmapFont();
+        this.font = FontManager.getInstance().getPequena();
         this.font.getData().setScale(0.9f);
         this.layout = new GlyphLayout();
     }
 
-    public void update() {
-        // No necesitas lógica adicional aquí
-    }
 
     public void draw(SpriteBatch batch) {
         // Guardar proyección original
@@ -59,7 +56,7 @@ public class Hud {
 
         int corazonesTotales = (int)Math.ceil(vidaMaxima / 20f); // 🔹 1 corazón por cada 20 puntos
         startX = 20f;
-        startY = screenHeight - 40f;
+        startY = screenHeight - 60f;
 
         float x = startX;
 
@@ -89,7 +86,7 @@ public class Hud {
         // --- DIBUJAR MONEDAS ---
         int monedas = jugador.getMonedas();
 
-        monedaX = screenWidth - 60f;
+        monedaX = screenWidth - 120f;
         monedaY = 20f;
 
         batch.draw(moneda, monedaX, monedaY);

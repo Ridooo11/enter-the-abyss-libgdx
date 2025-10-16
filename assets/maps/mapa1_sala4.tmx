@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="17" nextobjectid="37">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="39">
  <tileset firstgid="1" source="../../tiled_mapa2/Tiled_files/Ground_rocks.tsx"/>
  <tileset firstgid="2263" source="../../tiled_mapa2/Tiled_files/Objects_animated3.tsx"/>
  <tileset firstgid="3979" source="../../tiled_mapa2/Tiled_files/Objects.tsx"/>
@@ -102,8 +102,8 @@
  </layer>
  <layer id="16" name="Puerta" width="30" height="20">
   <data encoding="csv">
-0,0,0,0,0,0,0,0,0,0,0,0,0,7633,7638,7639,7636,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,7665,7670,7671,7668,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,7633,7634,7635,7636,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,7665,7666,7667,7668,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -159,6 +159,11 @@
     <property name="tipo" value="tienda"/>
    </properties>
   </object>
+  <object id="37" x="221.25" y="11.5833" width="41.9583" height="3.625">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="9" name="spawns">
   <object id="30" x="48.3259" y="274.422">
@@ -170,9 +175,17 @@
   </object>
  </objectgroup>
  <objectgroup id="10" name="transiciones">
-  <object id="34" x="229.116" y="2.1574" width="23.7314" height="21.574">
+  <object id="34" x="236.491" y="0.4074" width="7.7314" height="5.449">
    <properties>
     <property name="destino" value="sala5"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="17" name="puertas">
+  <object id="38" x="224" y="0" width="32" height="32">
+   <properties>
+    <property name="capa" value="Puerta"/>
+    <property name="tipo" value="puerta"/>
    </properties>
   </object>
  </objectgroup>

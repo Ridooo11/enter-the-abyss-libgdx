@@ -28,10 +28,6 @@ public class Sonidos {
         musicaJuego.setLooping(true);
         musicaDerrota.setLooping(false); // ✅ No repetir en Game Over
 
-        musicaMenu.setVolume(0.5f);
-        musicaJuego.setVolume(0.5f);
-        musicaDerrota.setVolume(0.7f); // ✅ Volumen más alto para impacto
-
         // Efectos
         sonidoAtaque = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/espada.mp3"));
         compraExitosa = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/compra_exitosa.mp3"));
@@ -43,24 +39,24 @@ public class Sonidos {
     // ✅ Efectos
     public static void reproducirAtaque() {
         if (sonidoAtaque != null) {
-            sonidoAtaque.play(volumenMusica);
+            sonidoAtaque.play(volumenEfectos);
         }
     }
 
     public static void reproducirCompraExitosa() {
-        compraExitosa.play(1.0f);
+        compraExitosa.play(volumenEfectos);
     }
 
     public static void reproducirCompraFallida() {
-        compraFallida.play(1.0f);
+        compraFallida.play(volumenEfectos);
     }
 
     public static void reproducirEvasion() {
-        if (sonidoEvasion != null) sonidoEvasion.play(5f);
+        if (sonidoEvasion != null) sonidoEvasion.play(volumenEfectos);
     }
 
-    private static float volumenMusica = 0.5f;
-    private static float volumenEfectos = 0.7f;
+    private static float volumenMusica = 0.2f;
+    private static float volumenEfectos = 0.2f;
 
     // ✅ AGREGAR ESTOS MÉTODOS
     public static void setVolumenMusica(float volumen) {

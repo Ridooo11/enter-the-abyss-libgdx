@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
+import com.abyssdev.entertheabyss.ui.FontManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class PantallaPausa extends Pantalla {
@@ -31,21 +33,16 @@ public class PantallaPausa extends Pantalla {
     private OrthographicCamera camara;
 
     public PantallaPausa(Game juego, SpriteBatch batch, PantallaJuego pantallaJuego) {
-        super(juego,batch);
+        super(juego, batch);
         this.pantallaJuego = pantallaJuego;
     }
 
     @Override
     public void show() {
-        font = new BitmapFont();
-        font.getData().setScale(2.2f);
+        font = FontManager.getInstance().getMediana();
 
         camara = new OrthographicCamera();
-        viewport = new FitViewport(800, 600, camara);
-        viewport.apply();
-        camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
-        camara.update();
-
+        viewport = new FitViewport(1280, 720, camara);
         fondoPausa = new Texture("Fondos/pausa2.PNG");
         layout = new GlyphLayout();
     }
@@ -63,23 +60,27 @@ public class PantallaPausa extends Pantalla {
 
         manejarInput();
 
+        // Actualizar cámara y viewport
         camara.update();
         batch.setProjectionMatrix(camara.combined);
 
-        float ancho = viewport.getWorldWidth();
-        float alto = viewport.getWorldHeight();
+        float mundoAncho = viewport.getWorldWidth();
+        float mundoAlto = viewport.getWorldHeight();
 
         batch.begin();
-        batch.draw(fondoPausa, 0, 0, ancho, alto);
+        batch.draw(fondoPausa, 0, 0, mundoAncho, mundoAlto);
 
-        float centerX = 400f;
-        float centerY = 300f;
+        // Centrar el bloque de opciones verticalmente
+        float espacioEntreOpciones = 50f;
+        float alturaTotalOpciones = (opciones.length - 1) * espacioEntreOpciones;
+        float startY = mundoAlto / 2f + alturaTotalOpciones / 2f + 30f;
 
         for (int i = 0; i < opciones.length; i++) {
             String texto = opciones[i];
             layout.setText(font, texto);
-            float x = centerX - layout.width / 2f;
-            float y = centerY + (opciones.length - 1 - i) * 60 - 60;
+
+            float x = mundoAncho / 2f - layout.width / 2f;
+            float y = startY - i * espacioEntreOpciones;
 
             if (i == opcionSeleccionada && mostrarColor) {
                 font.setColor(Color.YELLOW);
@@ -95,8 +96,8 @@ public class PantallaPausa extends Pantalla {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
-        camara.position.set(camara.viewportWidth / 2f, camara.viewportHeight / 2f, 0);
+        viewport.update(width, height, true); // true para centrar
+        camara.position.set(viewport.getWorldWidth() / 2f, viewport.getWorldHeight() / 2f, 0);
         camara.update();
     }
 
@@ -115,13 +116,13 @@ public class PantallaPausa extends Pantalla {
                     juego.setScreen(pantallaJuego);
                     break;
                 case 1:
-                    juego.setScreen(new PantallaOpciones(juego,batch, this));
+                    juego.setScreen(new PantallaOpciones(juego, batch, this));
                     break;
                 case 2:
-                    juego.setScreen(new PantallaTutorial(juego,batch, this));
+                    juego.setScreen(new PantallaTutorial(juego, batch, this));
                     break;
                 case 3:
-                    juego.setScreen(new MenuInicio(this.juego, this.batch));
+                    juego.setScreen(new MenuInicio(juego, batch));
                     break;
             }
         }
@@ -133,7 +134,8 @@ public class PantallaPausa extends Pantalla {
 
     @Override
     public void dispose() {
-        font.dispose();
-        fondoPausa.dispose();
+        if (fondoPausa != null) {
+            fondoPausa.dispose();
+        }
     }
 }

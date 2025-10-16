@@ -7,4 +7,44 @@
    <object id="3" name="Pared" x="0" y="0" width="16" height="16"/>
   </objectgroup>
  </tile>
+ <tile id="55">
+  <properties>
+   <property name="name" value="puerta_cerrada_izq_sup"/>
+  </properties>
+ </tile>
+ <tile id="56">
+  <properties>
+   <property name="name" value="puerta_cerrada_der_sup"/>
+  </properties>
+ </tile>
+ <tile id="59">
+  <properties>
+   <property name="name" value="puerta_abierta_izq_sup"/>
+  </properties>
+ </tile>
+ <tile id="60">
+  <properties>
+   <property name="name" value="puerta_abierta_der_sup"/>
+  </properties>
+ </tile>
+ <tile id="87">
+  <properties>
+   <property name="name" value="puerta_cerrada_izq_inf"/>
+  </properties>
+ </tile>
+ <tile id="88">
+  <properties>
+   <property name="name" value="puerta_cerrada_der_inf"/>
+  </properties>
+ </tile>
+ <tile id="91">
+  <properties>
+   <property name="name" value="puerta_abierta_izq_inf"/>
+  </properties>
+ </tile>
+ <tile id="92">
+  <properties>
+   <property name="name" value="puerta_abierta_der_inf"/>
+  </properties>
+ </tile>
 </tileset>

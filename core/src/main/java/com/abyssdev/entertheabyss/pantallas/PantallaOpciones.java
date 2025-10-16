@@ -45,6 +45,24 @@ public class PantallaOpciones extends Pantalla {
     private static final float SLIDER_WIDTH = 300f;
     private static final float SLIDER_HEIGHT = 10f;
 
+    private boolean pantallaCompleta;
+    private String[] resolucionesDisponibles = {
+        "Nativo",
+        "1280x720",
+        "1366x768",
+        "1600x900",
+        "1920x1080"
+    };
+    private int resolucionSeleccionada; // índice en resolucionesDisponibles
+
+    private final String[] opcionesMenu = {
+        "Volumen Musica",
+        "Volumen Efectos",
+        "Pantalla Completa",
+        "Resolucion",
+        "Volver"
+    };
+
     public PantallaOpciones(Game juego, SpriteBatch batch, Pantalla pantallaAnterior) {
         super(juego, batch);
         this.pantallaAnterior = pantallaAnterior;
@@ -76,6 +94,21 @@ public class PantallaOpciones extends Pantalla {
 
         Sonidos.setVolumenMusica(volumenMusica);
         Sonidos.setVolumenEfectos(volumenEfectos);
+
+        // Cargar preferencias de video
+        pantallaCompleta = prefs.getBoolean("pantallaCompleta", true);
+        String resGuardada = prefs.getString("resolucion", "Nativo");
+        resolucionSeleccionada = 0; // por defecto "Nativo"
+
+
+        for (int i = 0; i < resolucionesDisponibles.length; i++) {
+            if (resolucionesDisponibles[i].equals(resGuardada)) {
+                resolucionSeleccionada = i;
+                break;
+            }
+        }
+
+
 
         fondo = new Texture(Gdx.files.internal("Fondos/fondoMenu.png"));
         fondo.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -112,8 +145,6 @@ public class PantallaOpciones extends Pantalla {
         float centerY = alto / 2f;
 
         batch.begin();
-
-
         batch.draw(fondo, 0, 0, ancho, alto);
 
         // Título
@@ -121,72 +152,118 @@ public class PantallaOpciones extends Pantalla {
         layout.setText(titleFont, titulo);
         titleFont.draw(batch, titulo, centerX - layout.width / 2f, alto - 50);
 
-        // Volumen Música
-        String textoMusica = "Volumen Musica";
-        layout.setText(font, textoMusica);
-        float yMusica = centerY + 80;
+        // Altura base para las opciones
+        float startY = centerY + 100;
+        float espacio = 60f;
 
-        if (opcionSeleccionada == 0) {
-            font.setColor(1, 0, 0, alphaParpadeo);
-        } else {
-            font.setColor(1, 1, 1, 0.8f);
+        for (int i = 0; i < opcionesMenu.length; i++) {
+            String texto = "";
+            float y = startY - i * espacio;
+
+            switch (i) {
+                case 0:
+                    texto = "Volumen Musica";
+                    break;
+                case 1:
+                    texto = "Volumen Efectos";
+                    break;
+                case 2:
+                    texto = "Pantalla Completa: " + (pantallaCompleta ? "ON" : "OFF");
+                    break;
+                case 3:
+                    texto = "Resolucion: " + resolucionesDisponibles[resolucionSeleccionada];
+                    break;
+                case 4:
+                    texto = "Volver";
+                    break;
+            }
+
+            layout.setText(font, texto);
+
+            if (i == opcionSeleccionada) {
+                font.setColor(1, 0, 0, alphaParpadeo);
+            } else {
+                font.setColor(1, 1, 1, 0.8f);
+            }
+            font.draw(batch, texto, centerX - layout.width / 2f, y);
+
+            // Guardar bounds del botón "Volver" para input táctil
+            if (i == 4) {
+                botonVolverBounds.set(
+                    centerX - layout.width / 2f - 10,
+                    y - layout.height - 5,
+                    layout.width + 20,
+                    layout.height + 10
+                );
+            }
         }
-        font.draw(batch, textoMusica, centerX - layout.width / 2f, yMusica);
-
-        // Volumen Efectos
-        String textoEfectos = "Volumen Efectos";
-        layout.setText(font, textoEfectos);
-        float yEfectos = centerY;
-
-        if (opcionSeleccionada == 1) {
-            font.setColor(1, 0, 0, alphaParpadeo);
-        } else {
-            font.setColor(1, 1, 1, 0.8f);
-        }
-        font.draw(batch, textoEfectos, centerX - layout.width / 2f, yEfectos);
-
-        // Botón Volver
-        String textoVolver = "Volver";
-        layout.setText(font, textoVolver);
-        float yVolver = centerY - 120;
-
-        if (opcionSeleccionada == 2) {
-            font.setColor(1, 0, 0, alphaParpadeo);
-        } else {
-            font.setColor(1, 1, 1, 0.8f);
-        }
-        font.draw(batch, textoVolver, centerX - layout.width / 2f, yVolver);
-
-        botonVolverBounds.set(
-            centerX - layout.width / 2f - 10,
-            yVolver - layout.height - 5,
-            layout.width + 20,
-            layout.height + 10
-        );
 
         batch.end();
 
-        shapeRenderer.setProjectionMatrix(camara.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        // Dibujar sliders solo si están visibles
+        if (opcionSeleccionada == 0 || opcionSeleccionada == 1) {
+            shapeRenderer.setProjectionMatrix(camara.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        float sliderMusicaX = centerX - SLIDER_WIDTH / 2f;
-        float sliderMusicaY = yMusica - 40;
-        dibujarSlider(sliderMusicaX, sliderMusicaY, volumenMusica,
-            opcionSeleccionada == 0 || inputHandler.isArrastandoSliderMusica());
-        sliderMusicaBounds.set(sliderMusicaX, sliderMusicaY, SLIDER_WIDTH, SLIDER_HEIGHT);
+            float yMusica = startY;
+            float yEfectos = startY - espacio;
 
-        float sliderEfectosX = centerX - SLIDER_WIDTH / 2f;
-        float sliderEfectosY = yEfectos - 40;
-        dibujarSlider(sliderEfectosX, sliderEfectosY, volumenEfectos,
-            opcionSeleccionada == 1 || inputHandler.isArrastandoSliderEfectos());
-        sliderEfectosBounds.set(sliderEfectosX, sliderEfectosY, SLIDER_WIDTH, SLIDER_HEIGHT);
+            float sliderX = centerX - SLIDER_WIDTH / 2f;
+            float sliderMusicaY = yMusica - 40;
+            float sliderEfectosY = yEfectos - 40;
 
-        shapeRenderer.end();
+            dibujarSlider(sliderX, sliderMusicaY, volumenMusica,
+                opcionSeleccionada == 0 || inputHandler.isArrastandoSliderMusica());
+            sliderMusicaBounds.set(sliderX, sliderMusicaY, SLIDER_WIDTH, SLIDER_HEIGHT);
 
-        batch.begin();
-        dibujarPorcentaje(sliderMusicaX + SLIDER_WIDTH + 20, sliderMusicaY + 15, volumenMusica);
-        dibujarPorcentaje(sliderEfectosX + SLIDER_WIDTH + 20, sliderEfectosY + 15, volumenEfectos);
-        batch.end();
+            dibujarSlider(sliderX, sliderEfectosY, volumenEfectos,
+                opcionSeleccionada == 1 || inputHandler.isArrastandoSliderEfectos());
+            sliderEfectosBounds.set(sliderX, sliderEfectosY, SLIDER_WIDTH, SLIDER_HEIGHT);
+
+            shapeRenderer.end();
+
+            batch.begin();
+            dibujarPorcentaje(sliderX + SLIDER_WIDTH + 20, sliderMusicaY + 15, volumenMusica);
+            dibujarPorcentaje(sliderX + SLIDER_WIDTH + 20, sliderEfectosY + 15, volumenEfectos);
+            batch.end();
+        }
+    }
+
+    private void aplicarConfiguracionVideo() {
+        if (Gdx.app.getType() != Application.ApplicationType.Desktop) return;
+
+        Graphics.DisplayMode modoActual = Gdx.graphics.getDisplayMode();
+        int ancho = modoActual.width;
+        int alto = modoActual.height;
+
+        // Si no es "Nativo", parsear resolución
+        if (resolucionSeleccionada > 0) {
+            String[] partes = resolucionesDisponibles[resolucionSeleccionada].split("x");
+            try {
+                ancho = Integer.parseInt(partes[0]);
+                alto = Integer.parseInt(partes[1]);
+            } catch (Exception e) {
+                // fallback a nativo
+                ancho = modoActual.width;
+                alto = modoActual.height;
+            }
+        }
+
+        Gdx.graphics.setWindowedMode(ancho, alto);
+        if (pantallaCompleta) {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        } else {
+            // Asegurar modo ventana con la resolución elegida
+            Gdx.graphics.setWindowedMode(ancho, alto);
+        }
+    }
+
+    public void guardarPreferencias() {
+        prefs.putFloat("volumenMusica", volumenMusica);
+        prefs.putFloat("volumenEfectos", volumenEfectos);
+        prefs.putBoolean("pantallaCompleta", pantallaCompleta);
+        prefs.putString("resolucion", resolucionesDisponibles[resolucionSeleccionada]);
+        prefs.flush();
     }
 
     private void dibujarSlider(float x, float y, float valor, boolean seleccionado) {
@@ -214,39 +291,55 @@ public class PantallaOpciones extends Pantalla {
 
     private void manejarInputTeclado() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S)) {
-            opcionSeleccionada = (opcionSeleccionada + 1) % 3;
+            opcionSeleccionada = (opcionSeleccionada + 1) % opcionesMenu.length;
             tiempoParpadeo = 0;
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W)) {
-            opcionSeleccionada = (opcionSeleccionada - 1 + 3) % 3;
+            opcionSeleccionada = (opcionSeleccionada - 1 + opcionesMenu.length) % opcionesMenu.length;
             tiempoParpadeo = 0;
         }
 
+        // Acciones según opción seleccionada
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            switch (opcionSeleccionada) {
+                case 2: // Pantalla completa
+                    pantallaCompleta = !pantallaCompleta;
+                    if (Gdx.app.getType() == Application.ApplicationType.Desktop) {
+                        aplicarConfiguracionVideo();
+                    }
+                    break;
+                case 3:
+                    resolucionSeleccionada = (resolucionSeleccionada + 1) % resolucionesDisponibles.length;
+                    if (Gdx.app.getType() == Application.ApplicationType.Desktop) {
+                        aplicarConfiguracionVideo();
+                    }
+                    break;
+                case 4:
+                    guardarPreferencias();
+                    juego.setScreen(pantallaAnterior);
+                    break;
+            }
+        }
+
+        // Controles de volumen (solo si están seleccionados)
         if (opcionSeleccionada == 0) {
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
-                volumenMusica = Math.max(0f, volumenMusica - 0.01f);
+                volumenMusica = Math.max(0f, volumenMusica - 0.02f);
                 Sonidos.setVolumenMusica(volumenMusica);
             }
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-                volumenMusica = Math.min(1f, volumenMusica + 0.01f);
+                volumenMusica = Math.min(1f, volumenMusica + 0.02f);
                 Sonidos.setVolumenMusica(volumenMusica);
             }
         } else if (opcionSeleccionada == 1) {
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
-                volumenEfectos = Math.max(0f, volumenEfectos - 0.01f);
+                volumenEfectos = Math.max(0f, volumenEfectos - 0.02f);
                 Sonidos.setVolumenEfectos(volumenEfectos);
             }
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-                volumenEfectos = Math.min(1f, volumenEfectos + 0.01f);
+                volumenEfectos = Math.min(1f, volumenEfectos + 0.02f);
                 Sonidos.setVolumenEfectos(volumenEfectos);
-            }
-        }
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            if (opcionSeleccionada == 2) {
-                guardarPreferencias();
-                juego.setScreen(pantallaAnterior);
             }
         }
 
@@ -256,11 +349,6 @@ public class PantallaOpciones extends Pantalla {
         }
     }
 
-    public void guardarPreferencias() {
-        prefs.putFloat("volumenMusica", volumenMusica);
-        prefs.putFloat("volumenEfectos", volumenEfectos);
-        prefs.flush();
-    }
 
     public void setVolumenMusica(float volumen) {
         this.volumenMusica = volumen;

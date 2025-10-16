@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 
@@ -242,6 +243,14 @@ public class PantallaJuego extends Pantalla {
             }
         }
 
+        try {
+            salaActual.actualizarPuertas();
+        } catch (Exception e) {
+            System.out.println("ERROR AL ACTUALIZAR PUERTAS");
+            e.printStackTrace();
+        }
+
+
         jugador.update(delta, salaActual.getColisiones());
         verificarProximidadOgrini();
         verificarTransiciones();
@@ -295,7 +304,6 @@ public class PantallaJuego extends Pantalla {
         batch.end();
 
         if (hud != null) {
-            hud.update();
             hud.draw(batch);
         }
 

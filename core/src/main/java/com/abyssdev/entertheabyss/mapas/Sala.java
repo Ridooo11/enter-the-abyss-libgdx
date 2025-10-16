@@ -22,12 +22,15 @@ public class Sala {
     private String id;
     private TiledMap mapa;
     private OrthogonalTiledMapRenderer renderer;
-    private Array<Rectangle> colisiones;
+    private Array<Rectangle> colisionesEstaticas;   // ✅ Paredes fijas
+    private Array<Rectangle> colisionesDinamicas;   // ✅ Puertas (pueden desaparecer)
+    private Array<Rectangle> colisiones;            // ✅ Todas las colisiones combinadas
     private Array<ZonaTransicion> zonasTransicion;
     private ArrayList<Enemigo> enemigos;
     private Boss bossFinal;
     private boolean bossGenerado = false;
     private Array<SpawnPoint> spawnPoints;
+    private Array<Puerta> puertas;
     private int cantidadEnemigos;
     private boolean enemigosGenerados = false;
     private float anchoTiles, altoTiles;
@@ -38,6 +41,7 @@ public class Sala {
         this.cantidadEnemigos = cantidadEnemigos;
         cargarMapa(rutaTmx);
         cargarColisiones();
+        cargarPuertas();
         cargarZonasTransicion();
         cargarSpawnPoints();
     }
@@ -54,22 +58,110 @@ public class Sala {
     }
 
     private void cargarColisiones() {
+        colisionesEstaticas = new Array<>();
+        colisionesDinamicas = new Array<>();
         colisiones = new Array<>();
+
+        if (mapa.getLayers().get("colisiones") == null) {
+            System.err.println("⚠️ No hay capa 'colisiones' en el mapa: " + id);
+            return;
+        }
+
         MapObjects objetos = mapa.getLayers().get("colisiones").getObjects();
 
         for (MapObject objeto : objetos) {
             if (!(objeto instanceof RectangleMapObject)) continue;
-            if (!objeto.getProperties().containsKey("colision")) continue;
 
             RectangleMapObject rectObj = (RectangleMapObject) objeto;
             Rectangle rect = rectObj.getRectangle();
-            colisiones.add(new Rectangle(
+            Rectangle colisionRect = new Rectangle(
                 rect.x / TILE_SIZE,
                 rect.y / TILE_SIZE,
                 rect.width / TILE_SIZE,
                 rect.height / TILE_SIZE
-            ));
+            );
+
+            // ✅ Separar colisiones estáticas y dinámicas
+            if (objeto.getProperties().containsKey("colision")) {
+                colisionesEstaticas.add(colisionRect);
+                colisiones.add(colisionRect);
+            } else if (objeto.getProperties().containsKey("colisionPuerta")) {
+                colisionesDinamicas.add(colisionRect);
+                colisiones.add(colisionRect); // Inicialmente cerrada
+            }
         }
+
+        System.out.println("✅ Sala " + id + " - Colisiones estáticas: " + colisionesEstaticas.size);
+        System.out.println("✅ Sala " + id + " - Colisiones dinámicas (puertas): " + colisionesDinamicas.size);
+    }
+
+    private void cargarPuertas() {
+        puertas = new Array<>();
+
+        if (mapa.getLayers().get("puertas") == null) {
+            System.out.println("⚠️ No hay capa 'puertas' en el mapa " + id);
+            return;
+        }
+
+        MapObjects objetos = mapa.getLayers().get("puertas").getObjects();
+
+        for (MapObject objeto : objetos) {
+            if (!(objeto instanceof RectangleMapObject)) continue;
+            if (!"puerta".equals(objeto.getProperties().get("tipo", String.class))) continue;
+
+            RectangleMapObject rectObj = (RectangleMapObject) objeto;
+            Rectangle rect = rectObj.getRectangle();
+
+            // ✅ Leer la capa de tiles desde Tiled
+            String capaTiles = objeto.getProperties().get("capa", "Pared", String.class);
+
+            // ✅ Buscar la colisión física asociada
+            Rectangle colisionFisica = buscarColisionPuerta();
+
+            // ✅ Convertir coordenadas de píxeles a tiles
+            int tileX = (int) Math.floor(rect.x / TILE_SIZE);
+            int tileY = (int) Math.floor(rect.y / TILE_SIZE);
+            int tileW = (int) Math.ceil(rect.width / TILE_SIZE);
+            int tileH = (int) Math.ceil(rect.height / TILE_SIZE);
+
+            System.out.println("📦 Cargando puerta en sala " + id + ":");
+            System.out.println("   Área píxeles: x=" + rect.x + " y=" + rect.y + " w=" + rect.width + " h=" + rect.height);
+            System.out.println("   Área tiles: x=" + tileX + " y=" + tileY + " w=" + tileW + " h=" + tileH);
+            System.out.println("   Capa: " + capaTiles);
+
+            Puerta puerta = new Puerta(
+                tileX, tileY, tileW, tileH,
+                mapa, capaTiles, colisionFisica
+            );
+
+            puertas.add(puerta);
+        }
+
+        System.out.println("✅ Se cargaron " + puertas.size + " puertas en la sala " + id);
+    }
+
+    /**
+     * ✅ Busca la colisión física de la puerta en la capa "colisiones"
+     */
+    private Rectangle buscarColisionPuerta() {
+        MapObjects objetos = mapa.getLayers().get("colisiones").getObjects();
+
+        for (MapObject objeto : objetos) {
+            if (!(objeto instanceof RectangleMapObject)) continue;
+            if (!objeto.getProperties().containsKey("colisionPuerta")) continue;
+
+            RectangleMapObject rectObj = (RectangleMapObject) objeto;
+            Rectangle rect = rectObj.getRectangle();
+
+            return new Rectangle(
+                rect.x / TILE_SIZE,
+                rect.y / TILE_SIZE,
+                rect.width / TILE_SIZE,
+                rect.height / TILE_SIZE
+            );
+        }
+
+        return null;
     }
 
     private void cargarZonasTransicion() {
@@ -84,8 +176,8 @@ public class Sala {
             RectangleMapObject rectObj = (RectangleMapObject) objeto;
             Rectangle rect = rectObj.getRectangle();
             String destino = objeto.getProperties().get("destino", String.class);
-            String spawnName = objeto.getProperties().get("spawn_centro", "default", String.class); // propiedad clave
-            //boolean pasaMapa = objeto.getProperties().get("pasaMapa", false, Boolean.class);
+            String spawnName = objeto.getProperties().get("spawn_centro", "default", String.class);
+
             zonasTransicion.add(new ZonaTransicion(
                 rect.x / TILE_SIZE,
                 rect.y / TILE_SIZE,
@@ -93,7 +185,6 @@ public class Sala {
                 rect.height / TILE_SIZE,
                 destino,
                 spawnName
-                //pasaMapa
             ));
         }
     }
@@ -114,11 +205,11 @@ public class Sala {
             }, delay * 1.5f);
         }
     }
+
     public void generarBoss() {
         float x = MathUtils.random(2f, getAnchoMundo() - 2f);
         float y = MathUtils.random(2f, getAltoMundo() - 2f);
-        bossFinal = new Boss(x , y);
-
+        bossFinal = new Boss(x, y);
     }
 
     private void cargarSpawnPoints() {
@@ -141,12 +232,61 @@ public class Sala {
             spawnPoints.add(new SpawnPoint(x, y, name, salaId));
         }
     }
+
     public boolean hayEnemigosVivos() {
         if (this.enemigos == null) return false;
         for (Enemigo e : this.enemigos) {
             if (!e.debeEliminarse()) return true;
         }
         return false;
+    }
+
+    /**
+     * ✅ Actualiza el estado de las puertas y las colisiones
+     */
+    public void actualizarPuertas() {
+        if (puertas == null || puertas.size == 0) return;
+
+        boolean algunaPuertaSeAbrio = false;
+
+        // ✅ Abrir puertas si no hay enemigos ni boss
+        if (!hayEnemigosVivos() && (bossFinal == null || bossFinal.debeEliminarse())) {
+            for (int i = 0; i < puertas.size; i++) {
+                Puerta puerta = puertas.get(i);
+                if (!puerta.estaAbierta()) {
+                    puerta.abrir();
+                    algunaPuertaSeAbrio = true;
+                }
+            }
+        }
+
+        // ✅ Solo actualizar colisiones si cambió algo
+        if (algunaPuertaSeAbrio) {
+            actualizarColisiones();
+        }
+    }
+
+    /**
+     * ✅ Reconstruye la lista de colisiones combinando estáticas y dinámicas
+     */
+    private void actualizarColisiones() {
+        colisiones.clear();
+
+        // Agregar todas las estáticas
+        for (int i = 0; i < colisionesEstaticas.size; i++) {
+            colisiones.add(colisionesEstaticas.get(i));
+        }
+
+        // Agregar solo colisiones de puertas cerradas
+        for (int i = 0; i < puertas.size; i++) {
+            Puerta puerta = puertas.get(i);
+            Rectangle colPuerta = puerta.getColision();
+            if (colPuerta != null) {
+                colisiones.add(colPuerta);
+            }
+        }
+
+        System.out.println("🔄 Colisiones actualizadas: " + colisiones.size + " totales");
     }
 
     // GETTERS
@@ -158,16 +298,13 @@ public class Sala {
     public ArrayList<Enemigo> getEnemigos() { return this.enemigos; }
     public float getAnchoMundo() { return this.anchoTiles; }
     public float getAltoMundo() { return this.altoTiles; }
-    public Array<SpawnPoint> getSpawnPoints() {
-        return this.spawnPoints;
-    }
-    public Boss getBoss() {return this.bossFinal;}
-    public void setBoss(Boss boss) {this.bossFinal = boss;}
-    public boolean getBossGenerado(){return this.bossGenerado;}
+    public Array<SpawnPoint> getSpawnPoints() { return this.spawnPoints; }
+    public Boss getBoss() { return this.bossFinal; }
+    public void setBoss(Boss boss) { this.bossFinal = boss; }
+    public boolean getBossGenerado() { return this.bossGenerado; }
 
     public void dispose() {
         if (mapa != null) mapa.dispose();
         if (renderer != null) renderer.dispose();
     }
-
 }
