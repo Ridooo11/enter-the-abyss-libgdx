@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
+import com.abyssdev.entertheabyss.ui.FontManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -39,8 +40,7 @@ public class PantallaGameOver extends Pantalla {
 
     @Override
     public void show() {
-        font = new BitmapFont();
-        font.getData().setScale(2.2f);
+        font = FontManager.getInstance().getGrande();
 
         camara = new OrthographicCamera();
         viewport = new FitViewport(800, 600, camara);
@@ -51,7 +51,6 @@ public class PantallaGameOver extends Pantalla {
         fondoPausa = new Texture("Fondos/gameover.png");
         layout = new GlyphLayout();
 
-        // ✅ Reproducir música de derrota
         Sonidos.reproducirMusicaDerrota();
     }
 
@@ -131,7 +130,6 @@ public class PantallaGameOver extends Pantalla {
 
     @Override
     public void dispose() {
-        font.dispose();
         fondoPausa.dispose();
 
 

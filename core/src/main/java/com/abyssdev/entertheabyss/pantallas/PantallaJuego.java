@@ -216,7 +216,6 @@ public class PantallaJuego extends Pantalla {
             if (salaActual.getBoss() == null) {
                 salaActual.generarBoss();
             }
-
             Boss boss = salaActual.getBoss();
             if (boss != null && !boss.debeEliminarse()) {
                 // Actualizar el Boss
@@ -234,12 +233,16 @@ public class PantallaJuego extends Pantalla {
                         boss.recibirDanio(jugador.getDanio());
                     }
                 }
+            }
 
-                // Si el Boss muere
-                if (boss.debeEliminarse()) {
-                    jugador.modificarMonedas(50);
-                    System.out.println("✅ ¡JEFE DERROTADO! Jugador recibe 50 monedas.");
-                }
+            // ✅ Verificación de victoria: MOVIDA FUERA del if (!boss.debeEliminarse())
+            if (boss != null && boss.debeEliminarse() &&
+                (enemigos == null || enemigos.isEmpty())) {
+                jugador.modificarMonedas(50);
+                Sonidos.detenerTodaMusica();
+                System.out.println("✅ ¡JEFE DERROTADO! Jugador recibe 50 monedas.");
+                juego.setScreen(new PantallaWin(juego, batch));
+                return; // Evita más procesamiento innecesario
             }
         }
 

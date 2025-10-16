@@ -25,7 +25,7 @@ public class Jugador {
     private int municionActual = 30;
     private int municionMaxima = 30;
     private int monedas = 0;
-    private int danioBase = 5;
+    private int danioBase = 200;
 
     // HITBOX
     private final float anchoHitbox = 1f;

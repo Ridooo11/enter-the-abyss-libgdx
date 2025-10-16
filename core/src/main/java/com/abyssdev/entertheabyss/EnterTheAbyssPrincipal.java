@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss;
 
 import com.abyssdev.entertheabyss.pantallas.MenuInicio;
+import com.abyssdev.entertheabyss.pantallas.PantallaWin;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;

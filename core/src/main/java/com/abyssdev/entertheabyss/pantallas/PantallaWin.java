@@ -1,6 +1,7 @@
 package com.abyssdev.entertheabyss.pantallas;
 
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
+import com.abyssdev.entertheabyss.ui.FontManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -39,8 +40,7 @@ public class PantallaWin extends Pantalla {
 
     @Override
     public void show() {
-        font = new BitmapFont();
-        font.getData().setScale(2.2f);
+        font = FontManager.getInstance().getGrande();
 
         camara = new OrthographicCamera();
         viewport = new FitViewport(800, 600, camara);
@@ -51,11 +51,8 @@ public class PantallaWin extends Pantalla {
         fondoPausa = new Texture("Fondos/Win1.jpg");
         layout = new GlyphLayout();
 
-        // ✅ Reproducir música de victoria
-        //Sonidos.reproducirMusicaDerrota();
-        //
-         //
-         //
+
+        Sonidos.reproducirSonidoVictoria();
     }
 
     @Override
@@ -88,7 +85,7 @@ public class PantallaWin extends Pantalla {
             String texto = opciones[i];
             layout.setText(font, texto);
             float x = centerX - layout.width / 2f;
-            float y = centerY + (opciones.length - 1 - i) * 60 - 20; // Ajuste manual
+            float y = centerY + (opciones.length - 1 - i) * 60 - 100; // Ajuste manual
 
             if (i == opcionSeleccionada && mostrarColor) {
                 font.setColor(Color.YELLOW);
@@ -134,7 +131,6 @@ public class PantallaWin extends Pantalla {
 
     @Override
     public void dispose() {
-        font.dispose();
         fondoPausa.dispose();
 
 

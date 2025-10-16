@@ -16,6 +16,8 @@ public class Sonidos {
     private static Sound compraExitosa;
     private static Sound compraFallida;
     private static Sound sonidoEvasion;
+    private static Sound sonidoPuerta;
+    private static Sound sonidoVictoria;
 
     public static void cargar() {
         // Música
@@ -33,7 +35,8 @@ public class Sonidos {
         compraExitosa = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/compra_exitosa.mp3"));
         compraFallida = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/compra_fallida.mp3"));
         sonidoEvasion = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/dash.mp3"));
-
+        sonidoPuerta = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/puerta.mp3"));
+        sonidoVictoria = Gdx.audio.newSound(Gdx.files.internal("sonidos/efectos/victoria.mp3"));
     }
 
     // ✅ Efectos
@@ -53,6 +56,14 @@ public class Sonidos {
 
     public static void reproducirEvasion() {
         if (sonidoEvasion != null) sonidoEvasion.play(volumenEfectos);
+    }
+
+    public static void reproducirSonidoPuerta() {
+        if (sonidoPuerta != null) sonidoPuerta.play(volumenEfectos);
+    }
+
+    public static void reproducirSonidoVictoria() {
+        if (sonidoVictoria != null) sonidoVictoria.play(volumenEfectos);
     }
 
     private static float volumenMusica = 0.2f;
@@ -121,5 +132,6 @@ public class Sonidos {
         if (musicaJuego != null) musicaJuego.dispose();
         if (musicaDerrota != null) musicaDerrota.dispose(); // ✅ Liberar
         if (sonidoAtaque != null) sonidoAtaque.dispose();
+        if (sonidoPuerta != null) sonidoPuerta.dispose();
     }
 }

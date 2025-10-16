@@ -3,6 +3,7 @@ package com.abyssdev.entertheabyss.pantallas;
 import com.abyssdev.entertheabyss.EnterTheAbyssPrincipal;
 import com.abyssdev.entertheabyss.habilidades.*;
 import com.abyssdev.entertheabyss.personajes.Jugador;
+import com.abyssdev.entertheabyss.ui.FontManager;
 import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -63,8 +64,7 @@ public class PantallaArbolHabilidades extends Pantalla {
     public void show() {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
-        font = new BitmapFont();
-        font.getData().setScale(1.2f);
+        font = FontManager.getInstance().getPequena();
         layout = new GlyphLayout();
 
         fondo = new Texture("Fondos/FondoArbol.PNG");
@@ -102,12 +102,10 @@ public class PantallaArbolHabilidades extends Pantalla {
 
         // Dibuja la UI Superior/Panel de Monedas
         batch.begin();
-        font.getData().setScale(2.0f);
         font.setColor(Color.WHITE);
         layout.setText(font, "Árbol de Habilidades");
         font.draw(batch, layout, (viewport.getWorldWidth() - layout.width) / 2, viewport.getWorldHeight() - 40);
 
-        font.getData().setScale(1.2f);
         font.setColor(Color.YELLOW);
         font.draw(batch, "Monedas: " + jugador.getMonedas(), 50, 50);
 
@@ -266,8 +264,8 @@ public class PantallaArbolHabilidades extends Pantalla {
 
 
     private void dibujarPanelDetalles(Habilidad habilidad) {
-        float panelAncho = 250; // Reducimos el ancho del panel
-        float panelAlto = 250;  // Reducimos el alto del panel
+        float panelAncho = 350;
+        float panelAlto = 300;
         float panelY = viewport.getWorldHeight() / 2 - panelAlto / 2; // Centrado verticalmente
         float padding = 15;
 

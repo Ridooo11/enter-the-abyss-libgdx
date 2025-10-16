@@ -1,5 +1,6 @@
 package com.abyssdev.entertheabyss.mapas;
 
+import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -78,6 +79,7 @@ public class Puerta {
     public void abrir() {
         if (abierta) return;
         abierta = true;
+        Sonidos.reproducirSonidoPuerta();
         System.out.println("Abriendo puerta con " + tiles.size + " tiles...");
 
         for (TileInfo tileInfo : tiles) {
