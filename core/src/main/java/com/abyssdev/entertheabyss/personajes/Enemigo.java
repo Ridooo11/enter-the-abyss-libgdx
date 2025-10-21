@@ -13,6 +13,7 @@ public class Enemigo {
 
   //  private static final float VELOCIDAD = 3f;
     private static final float TAMANO = 3f;
+    private float velocidadBase = TipoEnemigoVelocidad.ENEMIGO.getVelocidad();
     private static final float DISTANCIA_ATAQUE = 0.8f;
    // private static final float COOLDOWN_ATAQUE = 4f;
     private static final float COOLDOWN_GOLPE = 0.1f;
@@ -99,7 +100,6 @@ public class Enemigo {
                 // Calcular dirección normalizada y velocidad
                 if (direccion.len() > 0.1f) {
                     direccion.nor();
-                    float velocidadBase = 3f;
                     velocidad.set(direccion.x * velocidadBase, direccion.y * velocidadBase);
                 } else {
                     velocidad.setZero();

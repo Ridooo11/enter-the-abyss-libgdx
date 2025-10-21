@@ -4,7 +4,7 @@ import com.abyssdev.entertheabyss.personajes.Jugador;
 
 public class HabilidadVida extends Habilidad {
     public HabilidadVida() {
-        super("Vida Extra", "Aumenta la salud máxima del jugador.", 5, "imagenes/corazon.png");
+        super("Vida Extra", "Aumenta la salud máxima del jugador.", 15, "imagenes/corazon.png");
     }
 
     @Override

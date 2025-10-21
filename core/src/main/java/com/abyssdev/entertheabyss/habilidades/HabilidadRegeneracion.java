@@ -4,7 +4,7 @@ import com.abyssdev.entertheabyss.personajes.Jugador;
 
 public class HabilidadRegeneracion extends Habilidad {
     public HabilidadRegeneracion() {
-        super("Regeneración", "Regenera salud lentamente.", 5, "imagenes/corazonDorado.PNG");
+        super("Regeneración", "Regenera salud lentamente.", 35, "imagenes/corazonDorado.PNG");
     }
 
     @Override

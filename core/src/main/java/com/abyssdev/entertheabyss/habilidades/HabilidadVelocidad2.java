@@ -6,7 +6,7 @@ public class HabilidadVelocidad2 extends Habilidad {
     public HabilidadVelocidad2() {
         super("Velocidad II",
             "Aumenta aún más la velocidad de movimiento.",
-            5,
+            25,
             "imagenes/botas2.PNG");
     }
 

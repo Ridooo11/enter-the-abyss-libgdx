@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="60">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="61">
  <tileset firstgid="1" source="texturas.tsx"/>
  <layer id="2" name="Piso" width="30" height="20">
   <data encoding="csv">
@@ -69,7 +69,7 @@
 0,0,0,0,0,0,0,0,0,0,329,458,0,0,0,0,295,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,367,368,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
@@ -199,6 +199,11 @@
    </properties>
   </object>
   <object id="58" x="222.182" y="11.0909" width="36.7273" height="3.27273">
+   <properties>
+    <property name="colision" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="60" x="320.109" y="293.167" width="29.9928" height="6.17913">
    <properties>
     <property name="colision" type="bool" value="true"/>
    </properties>

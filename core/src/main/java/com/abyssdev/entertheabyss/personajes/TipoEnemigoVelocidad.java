@@ -1,7 +1,7 @@
 package com.abyssdev.entertheabyss.personajes;
 
 public enum TipoEnemigoVelocidad {
-    ENEMIGO(3f),
+    ENEMIGO(2.5f),
     BOSS(1.5f);
 
     private float velocidad;

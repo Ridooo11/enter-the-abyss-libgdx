@@ -4,7 +4,7 @@ import com.abyssdev.entertheabyss.personajes.Jugador;
 
 public class HabilidadFuerza extends Habilidad {
     public HabilidadFuerza() {
-        super("Fuerza", "Aumenta el daño de ataque.", 5, "imagenes/espada.PNG");
+        super("Fuerza", "Aumenta el daño de ataque.", 15, "imagenes/espada.PNG");
     }
 
     @Override

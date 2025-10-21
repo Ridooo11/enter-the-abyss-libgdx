@@ -4,7 +4,7 @@ import com.abyssdev.entertheabyss.personajes.Jugador;
 
 public class HabilidadAtaqueVeloz extends Habilidad {
     public HabilidadAtaqueVeloz() {
-        super("Ataque Veloz", "Aumenta la velocidad de ataque.", 5, "imagenes/espadaDoble.PNG");
+        super("Ataque Veloz", "Aumenta la velocidad de ataque.", 25, "imagenes/espadaDoble.PNG");
     }
 
     @Override

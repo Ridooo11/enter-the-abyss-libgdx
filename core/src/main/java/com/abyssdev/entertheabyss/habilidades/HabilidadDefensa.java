@@ -4,7 +4,7 @@ import com.abyssdev.entertheabyss.personajes.Jugador;
 
 public class HabilidadDefensa extends Habilidad {
     public HabilidadDefensa() {
-        super("Defensa", "Reduce el daño recibido.", 5, "imagenes/escudo.png");
+        super("Defensa", "Reduce el daño recibido.", 25, "imagenes/escudo.png");
     }
 
     @Override

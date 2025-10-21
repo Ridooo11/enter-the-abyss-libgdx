@@ -4,7 +4,7 @@ import com.abyssdev.entertheabyss.personajes.Jugador;
 
 public class HabilidadGolpeCritico extends Habilidad {
     public HabilidadGolpeCritico() {
-        super("Golpe Crítico", "Aumenta más el daño de ataque.", 5, "imagenes/espadaRoja.PNG");
+        super("Golpe Crítico", "Aumenta más el daño de ataque.", 35, "imagenes/espadaRoja.PNG");
     }
 
     @Override
