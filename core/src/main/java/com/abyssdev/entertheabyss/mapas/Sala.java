@@ -230,7 +230,7 @@ public class Sala {
                         }
 
                         if (!colisiona) {
-                            nuevoEnemigo = new Enemigo(x, y);
+                            nuevoEnemigo = new Enemigo(x, y,3f,2f,10);
                         }
 
                         intentos++;
@@ -248,9 +248,51 @@ public class Sala {
     }
 
     public void generarBoss() {
-        float x = MathUtils.random(2f, getAnchoMundo() - 2f);
-        float y = MathUtils.random(2f, getAltoMundo() - 2f);
-        bossFinal = new Boss(x, y);
+        Boss nuevoBoss = null;
+        int intentos = 0;
+        final int MAX_INTENTOS = 50;
+        final float TAMANO_BOSS = 6f; // ✅ Tamaño visual del Boss
+
+        while (nuevoBoss == null && intentos < MAX_INTENTOS) {
+            float x = MathUtils.random(2f, getAnchoMundo() - 2f);
+            float y = MathUtils.random(2f, getAltoMundo() - 2f);
+
+            // ✅ Crear rectángulo temporal para verificar colisión
+            Rectangle rectTemp = new Rectangle(x, y, TAMANO_BOSS, TAMANO_BOSS);
+
+            boolean colisiona = false;
+
+            // Verificar colisiones con paredes
+            for (Rectangle r : colisiones) {
+                if (rectTemp.overlaps(r)) {
+                    colisiona = true;
+                    break;
+                }
+            }
+
+            // Verificar colisiones con enemigos (si ya hay enemigos generados)
+            if (!colisiona && enemigos != null) {
+                for (Enemigo e : enemigos) {
+                    if (rectTemp.overlaps(e.getRectangulo())) {
+                        colisiona = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!colisiona) {
+                nuevoBoss = new Boss(x, y, 1.5f,4f,30);
+            }
+
+            intentos++;
+        }
+
+        if (nuevoBoss != null) {
+            bossFinal = nuevoBoss;
+            System.out.println("✅ Boss generado en (" + nuevoBoss.getPosicion().x + ", " + nuevoBoss.getPosicion().y + ")");
+        } else {
+            System.err.println("❌ No se pudo generar el Boss después de " + MAX_INTENTOS + " intentos.");
+        }
     }
 
     private void cargarSpawnPoints() {

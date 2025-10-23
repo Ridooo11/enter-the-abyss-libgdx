@@ -11,13 +11,12 @@ import java.util.ArrayList;
 
 public class Enemigo {
 
-  //  private static final float VELOCIDAD = 3f;
+    private float velocidadEnemigo;
     private static final float TAMANO = 3f;
-    private float velocidadBase = TipoEnemigoVelocidad.ENEMIGO.getVelocidad();
     private static final float DISTANCIA_ATAQUE = 0.8f;
-   // private static final float COOLDOWN_ATAQUE = 4f;
+    private float coolDownAtaque;
     private static final float COOLDOWN_GOLPE = 0.1f;
-
+    private int danio;
     protected float tiempoDesdeUltimoAtaque = 0;
     protected float tiempoDesdeUltimoGolpe = 0f;
 
@@ -27,35 +26,36 @@ public class Enemigo {
     protected Accion estado;
     protected float tiempoEstado;
 
+    protected boolean eliminar;
+    protected boolean haciaIzquierda;
+    protected int vida = 30;
+    protected int vidaMaxima = 30;
+
     protected Animation<TextureRegion> animIdle;
     protected Animation<TextureRegion> animCaminar;
     protected Animation<TextureRegion> animAtacar;
     protected Animation<TextureRegion> animHit;
     protected Animation<TextureRegion> animMuerte;
 
-    protected boolean eliminar;
-    protected boolean haciaIzquierda;
-
-    // 🔹 Sistema de vida en lugar de golpes
-    protected int vida = 30;
-    protected int vidaMaxima = 30;
-
-    public Enemigo(float x, float y) {
-        hojaSprite = new Texture("personajes/esqueletoEnemigo.png");
-        posicion = new Vector2(x, y);
-        velocidad = new Vector2(0, 0);
-        estado = Accion.ESTATICO;
-        tiempoEstado = 0;
-        eliminar = false;
-        haciaIzquierda = false;
-        tiempoDesdeUltimoGolpe = 0;
-        tiempoDesdeUltimoAtaque = 0;
+    public Enemigo(float x, float y, float velocidadEnemigo, float coldown, int danio) {
+        this.hojaSprite = new Texture("personajes/esqueletoEnemigo.png");
+        this.posicion = new Vector2(x, y);
+        this.velocidad = new Vector2(0, 0);
+        this.danio = danio;
+        this.coolDownAtaque = coldown;
+        this.estado = Accion.ESTATICO;
+        this.tiempoEstado = 0;
+        this.eliminar = false;
+        this.velocidadEnemigo = velocidadEnemigo;
+        this.haciaIzquierda = false;
+        this.tiempoDesdeUltimoGolpe = 0;
+        this.tiempoDesdeUltimoAtaque = 0;
         cargarAnimaciones();
     }
 
     protected void cargarAnimaciones() {
         TextureRegion[][] regiones = TextureRegion.split(hojaSprite, 64, 64);
-        this.animAtacar = crearAnimacion(regiones[0], 13, 0.07f, Animation.PlayMode.LOOP);
+        this.animAtacar = crearAnimacion(regiones[0], 13, 0.07f, Animation.PlayMode.NORMAL);
         this.animMuerte = crearAnimacion(regiones[1], 13, 0.1f, Animation.PlayMode.NORMAL);
         this.animCaminar = crearAnimacion(regiones[2], 12, 0.1f, Animation.PlayMode.LOOP);
         this.animIdle = crearAnimacion(regiones[3], 4, 0.2f, Animation.PlayMode.LOOP);
@@ -84,13 +84,21 @@ public class Enemigo {
             cambiarEstado(Accion.ESTATICO);
         }
 
+        // Si está atacando, esperar a que termine la animación
+        if (estado == Accion.ATAQUE) {
+            if (animAtacar.isAnimationFinished(tiempoEstado)) {
+                cambiarEstado(Accion.ESTATICO);
+            }
+            return false;
+        }
+
         if (estado != Accion.HIT && estado != Accion.MUERTE) {
             Vector2 direccion = new Vector2(posicionJugador).sub(posicion);
             float distancia = direccion.len();
 
             if (distancia < DISTANCIA_ATAQUE) {
                 velocidad.setZero();
-                if (tiempoDesdeUltimoAtaque >= Accion.ATAQUE.getColdown()) {
+                if (tiempoDesdeUltimoAtaque >= this.coolDownAtaque) {
                     cambiarEstado(Accion.ATAQUE);
                     tiempoDesdeUltimoAtaque = 0;
                     Gdx.app.log("Enemigo", "¡Jugador ha sido atacado!");
@@ -100,7 +108,7 @@ public class Enemigo {
                 // Calcular dirección normalizada y velocidad
                 if (direccion.len() > 0.1f) {
                     direccion.nor();
-                    velocidad.set(direccion.x * velocidadBase, direccion.y * velocidadBase);
+                    velocidad.set(direccion.x * velocidadEnemigo, direccion.y * velocidadEnemigo);
                 } else {
                     velocidad.setZero();
                 }
@@ -116,7 +124,7 @@ public class Enemigo {
                 // Mover en X
                 posicion.x += velocidad.x * delta;
                 if (hayColision(getRectangulo(), colisionesMapa, otrosEnemigos)) {
-                    posicion.x = posAnterior.x; // Retroceder si hay colisión
+                    posicion.x = posAnterior.x;
                     velocidad.x = 0;
                 } else {
                     movioX = true;
@@ -125,7 +133,7 @@ public class Enemigo {
                 // Mover en Y
                 posicion.y += velocidad.y * delta;
                 if (hayColision(getRectangulo(), colisionesMapa, otrosEnemigos)) {
-                    posicion.y = posAnterior.y; // Retroceder si hay colisión
+                    posicion.y = posAnterior.y;
                     velocidad.y = 0;
                 } else {
                     movioY = true;
@@ -162,7 +170,6 @@ public class Enemigo {
         float drawX = posicion.x;
         float drawY = posicion.y;
 
-        // 🔁 Crea una copia del frame para evitar modificar el original
         TextureRegion frameRender = new TextureRegion(frame);
 
         if (haciaIzquierda && !frameRender.isFlipX()) {
@@ -190,7 +197,6 @@ public class Enemigo {
         }
     }
 
-    // 🔹 Recibe daño real en lugar de contar golpes
     public void recibirDanio(int danio) {
         if (tiempoDesdeUltimoGolpe < COOLDOWN_GOLPE || estado == Accion.MUERTE) return;
 
@@ -231,7 +237,6 @@ public class Enemigo {
         return posicion;
     }
 
-    // 🔹 Getters de vida (útiles para UI o debugging)
     public int getVida() {
         return this.vida;
     }
@@ -242,5 +247,9 @@ public class Enemigo {
 
     public static float getTamaño() {
         return TAMANO;
+    }
+
+    public int getDanio() {
+        return this.danio;
     }
 }

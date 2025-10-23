@@ -73,7 +73,6 @@ public class PantallaJuego extends Pantalla {
             actualizarCamara();
         }
         Gdx.input.setInputProcessor(inputProcessor);
-        //Sonidos.reproducirMusicaJuego();
     }
 
     private void cambiarSala(String destinoId) {
@@ -195,7 +194,7 @@ public class PantallaJuego extends Pantalla {
                 }
 
                 if (enemigo.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos)) {
-                    jugador.recibirDanio(Accion.ATAQUE.getDanioBruto(false));
+                    jugador.recibirDanio(enemigo.getDanio());
                     if (jugador.getVida() <= 0) {
                         juego.setScreen(new PantallaGameOver(juego,batch));
                         return;
@@ -220,7 +219,7 @@ public class PantallaJuego extends Pantalla {
             if (boss != null && !boss.debeEliminarse()) {
                 // Actualizar el Boss
                 if (boss.actualizar(delta, jugador.getPosicion(), salaActual.getColisiones(), enemigos != null ? enemigos : new ArrayList<>())) {
-                    jugador.recibirDanio(Accion.ATAQUE.getDanioBruto(true));
+                    jugador.recibirDanio(boss.getDanio());
                     if (jugador.getVida() <= 0) {
                         juego.setScreen(new PantallaGameOver(juego, batch));
                         return;
