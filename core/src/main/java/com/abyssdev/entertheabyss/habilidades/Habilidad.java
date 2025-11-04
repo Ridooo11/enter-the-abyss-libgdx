@@ -1,28 +1,37 @@
 package com.abyssdev.entertheabyss.habilidades;
 
+import com.abyssdev.entertheabyss.personajes.Jugador;
 import com.badlogic.gdx.graphics.Texture;
 
-public class Habilidad {
-    private String nombre;
-    private String descripcion;
-    private int costo;
-    private Texture icono;
-    public boolean desbloqueado = false;
-    public int nivelActual = 0;
-    public int nivelMaximo = 3;
+public abstract class Habilidad {
+    protected String nombre;
+    protected String descripcion;
+    protected int costo;
+    protected Texture icono;
+    public boolean comprada = false;
 
-    public Habilidad(String nombre, String descripcion, int costo, String iconoPath) {
+    public Habilidad(String nombre, String descripcion, int costo, String rutaIcono) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.costo = costo;
-        this.icono = new Texture(iconoPath);
+        this.icono = new Texture(rutaIcono);
     }
 
+    public abstract void aplicar(Jugador jugador);
+
     public String getNombre() {
-        return this.nombre;
+        return nombre;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public int getCosto() {
+        return costo;
     }
 
     public Texture getIcono() {
-        return this.icono;
+        return icono;
     }
 }

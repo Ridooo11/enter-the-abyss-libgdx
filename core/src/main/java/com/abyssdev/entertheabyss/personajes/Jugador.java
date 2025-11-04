@@ -1,24 +1,38 @@
 package com.abyssdev.entertheabyss.personajes;
 
+import com.abyssdev.entertheabyss.habilidades.*;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Rectangle; // Importar Rectangle para el hitbox
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.Color;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Jugador {
     private Vector2 posicion;
     private float ancho = 3f, alto = 3f;
-    private final float velocidad = 5f;
+    private float velocidad = 3.2f;
+
+    private int vida = 100;
+    private int vidaMaxima = 100;
+    private int municionActual = 30;
+    private int municionMaxima = 30;
+    private int monedas = 0;
+    private int danioBase = 5;
+
     // HITBOX
     private final float anchoHitbox = 1f;
     private final float altoHitbox = 1f;
     private final float offsetHitboxX = 1f;
     private final float offsetHitboxY = .5f;
+
     // MOVIMIENTO
     private boolean arriba, abajo, izquierda, derecha;
     private Texture hojaSprite;
@@ -38,43 +52,76 @@ public class Jugador {
     private float duracionHitboxAtaque = 0.1f;
     private float tiempoHitboxActivo;
 
+    private float tiempoUltimoAtaque = 0f;
+    private float cooldownAtaque = 1f;
+    private float porcentajeReduccionDanio = 0f;
+
+    private boolean regeneracionActiva = false;
+    private float tiempoRegeneracion = 0f;
+    private float intervaloRegeneracion = 1f; // Cada 1 segundo
+    private int cantidadRegeneracion = 1;
+
+    // --- DASH / EVASIÓN ---
+    private boolean evasionHabilitada = false;
+    private boolean estaEvadendo = false;
+    private float duracionEvasion = 0.3f; // dura 0.3 segundos
+    private float tiempoEvasion = 0f;
+    private float cooldownEvasion = 1.5f; // tiempo antes de poder volver a usar
+    private float tiempoDesdeUltimaEvasion = 0f;
+    private float velocidadBase = 3.2f;
+
+    private float parpadeoEvasion = 0f; // tiempo acumulado para parpadeo
+    private float intervaloParpadeo = 0.05f; // cambia cada 0.05s la visibilidad
+    private boolean mostrarFrame = true; // si dibujar o no
+
+
+    // 🔹 HABILIDADES DEL JUGADOR
+    private Map<String, Habilidad> habilidades;
+
     public Jugador() {
         this.posicion = new Vector2(100, 100);
         hojaSprite = new Texture("personajes/player.png");
         inicializarMapaFilas();
         cargarAnimaciones();
-
         hitboxAtaque = new Rectangle(0, 0, 0, 0);
+        // 🔹 Inicializar habilidades aquí
+        inicializarHabilidades();
+    }
+
+    private void inicializarHabilidades() {
+        habilidades = new HashMap<>();
+        habilidades.put("Vida Extra", new HabilidadVida());
+        habilidades.put("Defensa", new HabilidadDefensa());
+        habilidades.put("Regeneración", new HabilidadRegeneracion());
+        habilidades.put("Fuerza", new HabilidadFuerza());
+        habilidades.put("Ataque Veloz", new HabilidadAtaqueVeloz());
+        habilidades.put("Golpe Crítico", new HabilidadGolpeCritico());
+        habilidades.put("Velocidad", new HabilidadVelocidad());
+        habilidades.put("Velocidad II", new HabilidadVelocidad2());
+        habilidades.put("Evasión", new HabilidadEvasion());
+    }
+
+    // 🔹 Getter para que otras pantallas accedan
+    public Map<String, Habilidad> getHabilidades() {
+        return habilidades;
     }
 
     private void inicializarMapaFilas() {
         mapaFilasAnimacion = new int[Accion.values().length][Direccion.values().length];
-
-
-        // ESTATICO
-        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.ABAJO.ordinal()] = 0;   // Estático de frente
-        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.DERECHA.ordinal()] = 1; // Estático hacia la derecha
-        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.ARRIBA.ordinal()] = 2;   // Estático hacia arriba
-        // IDLE hacia la izquierda usa la animación de IDLE hacia la derecha (fila 1)
+        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.ABAJO.ordinal()] = 0;
+        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.DERECHA.ordinal()] = 1;
+        mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.ARRIBA.ordinal()] = 2;
         mapaFilasAnimacion[Accion.ESTATICO.ordinal()][Direccion.IZQUIERDA.ordinal()] = 1;
-
-        // CAMINAR
-        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.ABAJO.ordinal()] = 3;   // Caminar hacia abajo
-        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.DERECHA.ordinal()] = 4; // Caminar hacia la derecha
-        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.ARRIBA.ordinal()] = 5;   // Caminar hacia arriba
-        // Caminar hacia la izquierda usa la animación de caminar hacia la derecha (fila 4)
+        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.ABAJO.ordinal()] = 3;
+        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.DERECHA.ordinal()] = 4;
+        mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.ARRIBA.ordinal()] = 5;
         mapaFilasAnimacion[Accion.CAMINAR.ordinal()][Direccion.IZQUIERDA.ordinal()] = 4;
-
-        // ATAQUE
-        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.ABAJO.ordinal()] = 6;   // Atacar hacia abajo
-        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.DERECHA.ordinal()] = 7; // Atacar hacia la derecha
-        // Atacar hacia la izquierda usa la animación de atacar hacia la DERECHA (fila 7)
+        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.ABAJO.ordinal()] = 6;
+        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.DERECHA.ordinal()] = 7;
         mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.IZQUIERDA.ordinal()] = 7;
-        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.ARRIBA.ordinal()] = 8;   // Atacar hacia arriba
-
-        // MUERTE
+        mapaFilasAnimacion[Accion.ATAQUE.ordinal()][Direccion.ARRIBA.ordinal()] = 8;
         for (int dir = 0; dir < Direccion.values().length; dir++) {
-            mapaFilasAnimacion[Accion.MUERTE.ordinal()][dir] = 9; // Fila 9 para efecto de muerte
+            mapaFilasAnimacion[Accion.MUERTE.ordinal()][dir] = 9;
         }
     }
 
@@ -85,7 +132,6 @@ public class Jugador {
         for (Accion accion : Accion.values()) {
             for (Direccion dir : Direccion.values()) {
                 int filaSpriteSheet = mapaFilasAnimacion[accion.ordinal()][dir.ordinal()];
-
                 if (filaSpriteSheet >= regiones.length) {
                     Gdx.app.error("Jugador", "Error: La fila " + filaSpriteSheet +
                         " para la acción " + accion.name() +
@@ -144,13 +190,11 @@ public class Jugador {
             dy *= 0.7071f;
         }
 
-
         float nuevaX = posicion.x + dx * velocidad * delta;
         float nuevaY = posicion.y + dy * velocidad * delta;
 
         Rectangle hitboxX = new Rectangle(nuevaX + offsetHitboxX, posicion.y + offsetHitboxY, anchoHitbox, altoHitbox);
         Rectangle hitboxY = new Rectangle(posicion.x + offsetHitboxX, nuevaY + offsetHitboxY, anchoHitbox, altoHitbox);
-
 
         boolean colisionX = false;
         for (Rectangle r : colisiones) {
@@ -179,8 +223,7 @@ public class Jugador {
         if (accionActual != Accion.MUERTE) {
             if (accionActual == Accion.ATAQUE) {
                 estadoTiempo += delta;
-                // --- Lógica del Hitbox de Ataque ---
-                if (!atacandoAplicado && estadoTiempo >= 0.05f) { // Activa el hitbox después de 0.05 segundos
+                if (!atacandoAplicado && estadoTiempo >= 0.05f) {
                     actualizarHitboxAtaque();
                     atacandoAplicado = true;
                     tiempoHitboxActivo = 0;
@@ -188,7 +231,7 @@ public class Jugador {
                 if (atacandoAplicado) {
                     tiempoHitboxActivo += delta;
                     if (tiempoHitboxActivo >= duracionHitboxAtaque) {
-                        hitboxAtaque.setSize(0, 0); // Desactiva el hitbox
+                        hitboxAtaque.setSize(0, 0);
                     }
                 }
 
@@ -217,51 +260,87 @@ public class Jugador {
         } else {
             estadoTiempo += delta;
         }
+
+        // --- TIEMPO ENTRE ATAQUES ---
+        tiempoUltimoAtaque += delta;
+
+        // --- REGENERACIÓN DE VIDA AUTOMÁTICA ---
+        if (regeneracionActiva && vida < vidaMaxima) {
+            tiempoRegeneracion += delta;
+            if (tiempoRegeneracion >= intervaloRegeneracion) {
+                tiempoRegeneracion = 0f;
+                vida = Math.min(vida + cantidadRegeneracion, vidaMaxima);
+                Gdx.app.log("Jugador", "Regenerando vida... (" + vida + "/" + vidaMaxima + ")");
+            }
+        }
+
+        // --- EVASIÓN (DASH) ---
+        if (estaEvadendo) {
+            tiempoEvasion += delta;
+            if (tiempoEvasion >= duracionEvasion) {
+                estaEvadendo = false;
+                velocidad = velocidadBase; // volver a velocidad normal
+                mostrarFrame = true; // asegurarse que el personaje se dibuje normalmente
+                parpadeoEvasion = 0f;
+            }
+        } else {
+            tiempoDesdeUltimaEvasion += delta;
+        }
     }
+
 
     public void dibujar(SpriteBatch batch) {
         Animation<TextureRegion> currentAnimation = animaciones[accionActual.ordinal()][direccionActual.ordinal()];
         TextureRegion frameADibujar = currentAnimation.getKeyFrame(estadoTiempo);
 
-        // --- Lógica de Volteo de Sprites ---
         boolean voltearX = false;
         if (direccionActual == Direccion.IZQUIERDA) {
-            // Voltear si la acción es ESTATICO, CAMINAR, o ATAQUE,
-            // ya que sus animaciones de IZQUIERDA reutilizan las de DERECHA.
             if (accionActual == Accion.ESTATICO || accionActual == Accion.CAMINAR || accionActual == Accion.ATAQUE) {
                 voltearX = true;
             }
         }
 
-        // Aplicar o revertir el volteo del frame
-        TextureRegion frameParaDibujar = new TextureRegion(frameADibujar); // Crea una COPIA
-
+        TextureRegion frameParaDibujar = new TextureRegion(frameADibujar);
         if (frameParaDibujar.isFlipX() && !voltearX) {
-            frameParaDibujar.flip(true, false); // Desvoltear si estaba volteado y no debería estarlo
+            frameParaDibujar.flip(true, false);
         } else if (!frameParaDibujar.isFlipX() && voltearX) {
-            frameParaDibujar.flip(true, false); // Voltear si no estaba volteado y debería estarlo
+            frameParaDibujar.flip(true, false);
         }
 
-        batch.draw(frameParaDibujar, posicion.x, posicion.y, ancho, alto);
+        // --- EFECTO DASH ---
+        if (estaEvadendo) {
+            parpadeoEvasion += Gdx.graphics.getDeltaTime();
+            if (parpadeoEvasion >= intervaloParpadeo) {
+                mostrarFrame = !mostrarFrame;
+                parpadeoEvasion = 0f;
+            }
+            if (mostrarFrame) {
+                batch.setColor(1f, 1f, 1f, 0.5f); // 50% transparencia
+                batch.draw(frameParaDibujar, posicion.x, posicion.y, ancho, alto);
+                batch.setColor(Color.WHITE); // volver a normal
+            }
+        } else {
+            batch.draw(frameParaDibujar, posicion.x, posicion.y, ancho, alto);
+        }
     }
 
     private void actualizarHitboxAtaque() {
-        float hitboxWidth = 30f;
-        float hitboxHeight = 30f;
+        float hitboxWidth = 0.5f;
+        float hitboxHeight = 0.5f;
         float offsetX = 0;
         float offsetY = 0;
 
         switch (direccionActual) {
             case ABAJO:
                 offsetX = (ancho - hitboxWidth) / 2;
-                offsetY = -hitboxHeight;
+                offsetY = -0.5f;
                 break;
             case ARRIBA:
                 offsetX = (ancho - hitboxWidth) / 2;
                 offsetY = alto;
                 break;
             case IZQUIERDA:
-                offsetX = -hitboxWidth;
+                offsetX = -0.5f;
                 offsetY = (alto - hitboxHeight) / 2;
                 break;
             case DERECHA:
@@ -270,16 +349,17 @@ public class Jugador {
                 break;
         }
         hitboxAtaque.set(posicion.x + offsetX, posicion.y + offsetY, hitboxWidth, hitboxHeight);
-        Gdx.app.log("Jugador", "Hitbox de ataque activado en: " + hitboxAtaque.toString());
+        System.out.println("[Jugador] Hitbox de ataque: " + hitboxAtaque.toString());
     }
 
-
     public void atacar() {
-        if (accionActual != Accion.ATAQUE && accionActual != Accion.MUERTE) {
+        if (tiempoUltimoAtaque >= cooldownAtaque && accionActual != Accion.MUERTE) {
             accionActual = Accion.ATAQUE;
             estadoTiempo = 0;
             atacandoAplicado = false;
             tiempoHitboxActivo = 0;
+            tiempoUltimoAtaque = 0;
+            Sonidos.reproducirAtaque();
         }
     }
 
@@ -288,23 +368,128 @@ public class Jugador {
             accionActual = Accion.MUERTE;
             estadoTiempo = 0;
             atacandoAplicado = false;
-            hitboxAtaque.setSize(0,0);
+            hitboxAtaque.setSize(0, 0);
         }
     }
 
+    // --- NUEVOS MÉTODOS PARA ÁRBOL DE HABILIDADES ---
+    public void aumentarVelocidad(float incremento) {
+        this.velocidad += incremento;
+        Gdx.app.log("Jugador", "Nueva velocidad: " + this.velocidad);
+    }
+
+    public void reducirCooldownAtaque(float reduccion) {
+        this.cooldownAtaque -= reduccion;
+        Gdx.app.log("Jugador", "Nueva velocidad de ataque: " + this.cooldownAtaque);
+    }
+
+    public void aumentarDanio(int cantidad) {
+        this.danioBase += cantidad;
+        Gdx.app.log("Jugador", "Daño aumentado a: " + this.danioBase);
+    }
+
+    public void habilitarEvasion(boolean b) {
+        this.evasionHabilitada = b;
+        Gdx.app.log("Jugador", "Evasión " + (b ? "habilitada" : "deshabilitada"));
+    }
+
+
+    public float getVelocidad() {
+        return this.velocidad;
+    }
+
+    public void aumentarVidaMaxima(int i) {
+        this.vidaMaxima += i;
+        this.vida = Math.min(this.vida, this.vidaMaxima);
+        Gdx.app.log("Jugador", "Vida máxima aumentada a: " + this.vidaMaxima);
+    }
+
+    public void reducirDanioRecibido(float porcentaje) {
+        this.porcentajeReduccionDanio += porcentaje;
+        this.porcentajeReduccionDanio = Math.min(0.9f, this.porcentajeReduccionDanio);
+        Gdx.app.log("Jugador", "Reducción de daño actual: " + (int)(this.porcentajeReduccionDanio * 100) + "%");
+    }
+
+    public void activarRegeneracion(int cantidadPorSegundo) {
+        this.regeneracionActiva = true;
+        this.cantidadRegeneracion = cantidadPorSegundo;
+        this.tiempoRegeneracion = 0f;
+        Gdx.app.log("Jugador", "Regeneración activada: +" + cantidadPorSegundo + " por segundo");
+    }
+
+    public void intentarEvasion() {
+        if (!evasionHabilitada) return;
+        if (estaEvadendo) return;
+        if (tiempoDesdeUltimaEvasion < cooldownEvasion) return;
+
+        estaEvadendo = true;
+        tiempoEvasion = 0f;
+        tiempoDesdeUltimaEvasion = 0f;
+
+        // Aumenta temporalmente la velocidad
+        velocidad = velocidadBase * 4f;
+
+        // Reproducir sonido opcional
+        Sonidos.reproducirEvasion(); // solo si querés agregarlo
+
+        Gdx.app.log("Jugador", "¡Evasión activada!");
+    }
+
+
+
+    // --- GETTERS ---
+    public int getVida() { return this.vida; }
+    public int getVidaMaxima() { return this.vidaMaxima; }
+    public int getMunicionActual() { return this.municionActual; }
+    public int getMunicionMaxima() { return this.municionMaxima; }
+    public int getMonedas() { return this.monedas; }
+    public int getDanio() { return this.danioBase; }
+    public float getX() { return this.posicion.x; }
+    public float getY() { return this.posicion.y; }
+    public Vector2 getPosicion() { return this.posicion; }
+    public float getAncho() { return this.ancho; }
+    public float getAlto() { return this.alto; }
+    public Rectangle getHitboxAtaque() { return this.hitboxAtaque; }
+
+
+    // --- SETTERS ---
+    public void setVida(int vida) {
+        this.vida = Math.max(0, Math.min(vida, vidaMaxima));
+    }
+
+    public void modificarVida(int cantidad) {
+        setVida(this.vida + cantidad);
+    }
+
+    public void setMunicionActual(int municion) {
+        this.municionActual = Math.max(0, Math.min(municion, municionMaxima));
+    }
+
+    public void modificarMunicion(int cantidad) {
+        setMunicionActual(this.municionActual + cantidad);
+    }
+
+    public void setMonedas(int monedas) {
+        this.monedas = Math.max(0, monedas);
+    }
+
+    public void modificarMonedas(int cantidad) {
+        setMonedas(this.monedas + cantidad);
+    }
 
     public void dispose() {
         if (hojaSprite != null) {
             hojaSprite.dispose();
         }
+        // 🔹 Liberar texturas de habilidades
+        if (habilidades != null) {
+            for (Habilidad h : habilidades.values()) {
+                if (h.getIcono() != null) {
+                    h.getIcono().dispose();
+                }
+            }
+        }
     }
-
-    public float getX() { return posicion.x; }
-    public float getY() { return posicion.y; }
-    public Vector2 getPosicion() { return posicion; }
-    public float getAncho() { return this.ancho; }
-    public float getAlto() { return this.alto; }
-    public Rectangle getHitboxAtaque() { return hitboxAtaque; }
 
     public void setX(float x) { this.posicion.x = x; }
     public void setY(float y) { this.posicion.y = y; }
@@ -314,4 +499,18 @@ public class Jugador {
     public void moverAbajo(boolean activo) { this.abajo = activo; }
     public void moverIzquierda(boolean activo) { this.izquierda = activo; }
     public void moverDerecha(boolean activo) { this.derecha = activo; }
+
+    public void recibirDanio(int danioBruto) {
+        if (danioBruto <= 0) return;
+
+        float danioReducido = danioBruto * (1f - porcentajeReduccionDanio);
+        int danioFinal = Math.max(1, (int) Math.floor(danioReducido));
+
+        this.vida -= danioFinal;
+        Gdx.app.log("Jugador",
+            "Daño recibido: " + danioFinal +
+                " (original: " + danioBruto +
+                ", reducción: " + (int)(porcentajeReduccionDanio * 100) + "%). " +
+                "Vida actual: " + this.vida);
+    }
 }

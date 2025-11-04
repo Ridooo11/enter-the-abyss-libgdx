@@ -1,28 +1,44 @@
 package com.abyssdev.entertheabyss;
 
 import com.abyssdev.entertheabyss.pantallas.MenuInicio;
-import com.abyssdev.entertheabyss.personajes.Jugador;
-import com.badlogic.gdx.ApplicationAdapter;
+import com.abyssdev.entertheabyss.pantallas.PantallaWin;
+import com.abyssdev.entertheabyss.ui.Sonidos;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.ScreenUtils;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class EnterTheAbyssPrincipal extends Game {
     public SpriteBatch batch; // SpriteBatch usado por todas las pantallas que va a tener el juego
+    private Preferences prefs;
 
     @Override
     public void create() {
         batch = new SpriteBatch();
-        setScreen(new MenuInicio(this));
+
+        // Inicializar preferencias
+        prefs = Gdx.app.getPreferences("EnterTheAbyss_Settings");
+
+        float volumenMusica = prefs.getFloat("volumenMusica", .2f);
+        float volumenEfectos = prefs.getFloat("volumenEfectos", .2f);
+
+        // Inicializar sonidos y aplicar volúmenes
+        Sonidos.cargar();
+        Sonidos.setVolumenMusica(volumenMusica);
+        Sonidos.setVolumenEfectos(volumenEfectos);
+
+        // Arrancar en el menú
+        setScreen(new MenuInicio(this,batch));
     }
 
     @Override
     public void dispose() {
         batch.dispose();
+        Sonidos.dispose();
+    }
+
+
+    public Preferences getPreferencias() {
+        return prefs;
     }
 }
